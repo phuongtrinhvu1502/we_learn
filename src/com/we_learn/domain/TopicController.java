@@ -52,4 +52,15 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.update(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
+	@POST
+	@Path("delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response delete(@HeaderParam("Authorization") String token, String param) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
+		JSONObject result = topicDao.delete(param, this.userId);
+		return Response.status(200).entity(result.toString()).build();
+	}
 }

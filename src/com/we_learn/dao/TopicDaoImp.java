@@ -73,8 +73,26 @@ public class TopicDaoImp implements TopicDao{
 
 	@Override
 	public JSONObject delete(String param, String user_id) {
-		// TODO Auto-generated method stub
-		return null;
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String article_id = jsonParams.get("article_id").toString();
+		String query = "UPDATE `topic` SET `deleted`=1, `update_at` =?, `update_by` = ? WHERE `article_id` = ?";
+		//insert
+		try {
+			String dateTimeNow = mainUtil.getDateFormat("yyyy-MM-dd HH:mm:ss", new Date());
+			Object[] objects = new Object[] {dateTimeNow, user_id, article_id};
+			int row = this.jdbcTemplate.update(query, objects);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			return result;
+		}
+		result.put("success", true);
+		result.put("msg", "Article delete success");
+		return result;
 	}
 
 }
