@@ -95,4 +95,17 @@ public class TopicDaoImp implements TopicDao{
 		return result;
 	}
 
+	@Override
+	public JSONObject getTopicByPage(String param) {
+		// TODO Auto-generated method stub
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String page = jsonParams.get("page").toString();
+		int index = mainUtil.getPageIndex(page);
+		String order = jsonParams.get("order").toString();
+		String orberBy = jsonParams.get("orderBy").toString();
+		return null;
+	}
+
 }

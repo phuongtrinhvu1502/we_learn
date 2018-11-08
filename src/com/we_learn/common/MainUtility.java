@@ -28,4 +28,10 @@ public class MainUtility {
 			return "";
 		}
 	}
+	public int getPageIndex(String page) {
+		int pageIndex = Integer.parseInt(page);
+		int index = (pageIndex - 1) * 10;
+		return index;
+	}
+	
 }

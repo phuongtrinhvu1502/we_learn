@@ -6,4 +6,5 @@ public interface TopicDao {
 	JSONObject insert(String param, String user_id);
 	JSONObject update(String param, String user_id);
 	JSONObject delete(String param, String user_id);
+	JSONObject getTopicByPage(String param);
 }
