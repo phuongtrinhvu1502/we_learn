@@ -1,5 +1,7 @@
 package com.we_learn.dao;
 
+import java.util.Date;
+
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -43,13 +45,34 @@ public class TopicDaoImp implements TopicDao{
 	}
 
 	@Override
-	public JSONObject update(String param) {
-		// TODO Auto-generated method stub
-		return null;
+	public JSONObject update(String param, String user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String title = jsonParams.get("topic_title").toString();
+		String content = jsonParams.get("content").toString();
+		String type = jsonParams.get("topic_type").toString();
+		String article_id = jsonParams.get("article_id").toString();
+		String query = "UPDATE `topic` SET `article_title`=?, `article_content` =?,`type_id` = ?, `update_at` =?, `update_by` = ? WHERE `article_id` = ?";
+		//insert
+		try {
+			String dateTimeNow = mainUtil.getDateFormat("yyyy-MM-dd HH:mm:ss", new Date());
+			Object[] objects = new Object[] {title, content, type, dateTimeNow, user_id, article_id};
+			int row = this.jdbcTemplate.update(query, objects);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			return result;
+		}
+		result.put("success", true);
+		result.put("msg", "Article update success");
+		return result;
 	}
 
 	@Override
-	public JSONObject delete(String param) {
+	public JSONObject delete(String param, String user_id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

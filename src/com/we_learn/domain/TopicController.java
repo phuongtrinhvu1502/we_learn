@@ -34,11 +34,22 @@ public class TopicController extends VerifyToken{
 	@Path("insert")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAreaByPage(@HeaderParam("Authorization") String token, String param) {
+	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
 		JSONObject result = topicDao.insert(param, this.userId);
+		return Response.status(200).entity(result.toString()).build();
+	}
+	@POST
+	@Path("update")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response update(@HeaderParam("Authorization") String token, String param) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
+		JSONObject result = topicDao.update(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }
