@@ -94,6 +94,7 @@ public class LoginDaoImp implements LoginDao{
 			result.put("success", false);
 			result.put("msg", "Login fail.");
 		} catch (Exception e) {
+			e.printStackTrace();
 			result.put("success", false);
 			result.put("msg", e.getMessage());
 		}
