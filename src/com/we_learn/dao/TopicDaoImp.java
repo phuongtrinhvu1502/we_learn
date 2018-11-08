@@ -1,10 +1,12 @@
 package com.we_learn.dao;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.we_learn.common.MainUtility;
 
 public class TopicDaoImp implements TopicDao{
@@ -104,8 +106,25 @@ public class TopicDaoImp implements TopicDao{
 		String page = jsonParams.get("page").toString();
 		int index = mainUtil.getPageIndex(page);
 		String order = jsonParams.get("order").toString();
-		String orberBy = jsonParams.get("orderBy").toString();
-		return null;
+		String orderBy = jsonParams.get("orderBy").toString();
+		String key = jsonParams.get("key").toString();
+		List<Map<String, Object>> listTopic = new ArrayList<>();
+		String query = "SELECT `topic`.`user_id`,`topic`.`article_title`, `topic`.`create_at`, `crm_user`.`full_name`, "
+				+ "if(a.`comments` IS NULL, 0 , a.`comments`) AS comments FROM `topic` "
+				+ "LEFT JOIN `crm_user` ON `crm_user`.`user_id` = `topic`.`user_id` "
+				+ "LEFT JOIN (SELECT COUNT(1) AS `comments`, `article_id` "
+				+ "FROM `article_comment` GROUP BY `article_comment`.`article_id`) AS a ON a.`article_id` = `topic`.`article_id` "
+				+ "WHERE `topic`.`article_title` LIKE '" + key + "%' ORDER BY ? ? LIMIT ?,10";
+		try {
+			Object[] objects = new Object[] {order, orderBy, index};
+			listTopic = this.jdbcTemplate.queryForList(query, objects);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		result.put("success", true);
+		result.put("list", listTopic);
+		return result;
 	}
 
 }
