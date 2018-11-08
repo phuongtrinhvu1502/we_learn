@@ -6,3 +6,6 @@
   * update
     - api: we_learn/article/update
     - content: {"content":"Hello this is a topic was updated", "topic_type":1, "topic_title":"Test topic(updated)", "article_id": 2}
+  * delete
+    - api: we_learn/article/delete
+    - content: {"article_id": 2}
