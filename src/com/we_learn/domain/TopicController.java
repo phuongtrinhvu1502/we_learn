@@ -1,9 +1,16 @@
 package com.we_learn.domain;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -15,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.TopicDao;
 import com.we_learn.dao.TopicDaoImp;
@@ -35,8 +43,8 @@ public class TopicController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
-//		if (!this.isLogined)
-//			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
 		JSONObject result = topicDao.insert(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
@@ -52,26 +60,63 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.update(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
-	@POST
+	@PUT
+	@Path("remove")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response remove(@HeaderParam("Authorization") String token, String article) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
+		JSONObject result = topicDao.remove(article, Integer.parseInt(this.userId));
+		return Response.status(200).entity(result.toString()).build();
+	}
+
+	@PUT
+	@Path("restore")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response restore(@HeaderParam("Authorization") String token, String article) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
+		JSONObject result = topicDao.restore(article, Integer.parseInt(this.userId));
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@DELETE
 	@Path("delete")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response delete(@HeaderParam("Authorization") String token, String param) {
+	public Response delete(@HeaderParam("Authorization") String token, String article) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.delete(param, this.userId);
+		JSONObject result = topicDao.delete(article, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
+	
 	@POST
-	@Path("get-topic-by-date")
+	@Path("get-article-by-page")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getTopicByPage(@HeaderParam("Authorization") String token, String param) {
+//		if (!this.isLogined)
+//			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
+		JSONObject result = topicDao.getTopicByPage(param);
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@GET
+	@Path("get-article-by-id")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.getTopicByPage(param);
+		JSONObject result = topicDao.getArticleById(request.getParameter("article_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

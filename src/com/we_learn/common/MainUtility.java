@@ -68,4 +68,25 @@ public class MainUtility {
 		result.put("msg", "Bạn không có quyền thao tác");
 		return result;
 	}
+	
+	public void getLimitOffset(StringBuilder builder, JSONObject jsonParams) {
+		// nếu results không phải là số thì lấy mặc định = 10
+		int results = (jsonParams.get("pageSize") != null) ? Integer.parseInt(jsonParams.get("pageSize").toString())
+				: 10;
+		builder.append(" LIMIT " + results);
+		if (jsonParams.get("current") != null) {
+			builder.append(" OFFSET " + (Integer.parseInt(jsonParams.get("current").toString()) - 1) * results);
+		}
+	}
+	
+	public String dateToStringFormat(Date date, String formatOutput) {
+		String result = "";
+		try {
+			DateFormat df = new SimpleDateFormat(formatOutput);
+			result = df.format(date);
+		} catch (Exception e) {
+			return result;
+		}
+		return result;
+	}
 }
