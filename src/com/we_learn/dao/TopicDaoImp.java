@@ -212,11 +212,15 @@ public class TopicDaoImp implements TopicDao{
 		String query = "SELECT article.type_id AS article_type, article.article_title, article.article_content "
 				+ "FROM article "
 				+ "WHERE article.article_id = " + article_id;
+		String queryForComments = "SELECT comment_id,DATE_FORMAT(created_date, '%H:%i %d-%m-%Y') AS `created_date`, "
+				+ "content, crm_user.full_name FROM `article_comment` LEFT JOIN crm_user ON crm_user.user_id = article_comment.user_id "
+				+ "WHERE article_id = ? ORDER BY created_date DESC";
 		try {
 			Map<String, Object> articleObject = this.jdbcTemplate.queryForMap(query);
-
+			List<Map<String, Object>> listComments = this.jdbcTemplate.queryForList(queryForComments, new Object[] {article_id});
 			result.put("success", true);
 			result.put("data", articleObject);
+			result.put("comments", listComments);
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("msg", e.getMessage());
