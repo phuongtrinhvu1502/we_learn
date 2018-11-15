@@ -10,4 +10,5 @@ public interface TopicDao {
 	public JSONObject restore(String article, int user_id);
 	public JSONObject getArticleById(String article_id);
 	JSONObject getTopicByPage(String param);
+	JSONObject getCommentByArticle(String param);
 }
