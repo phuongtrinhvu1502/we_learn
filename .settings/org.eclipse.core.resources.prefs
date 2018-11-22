@@ -1,4 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/com/we_learn/common/MainUtility.java=UTF-8
 encoding//src/com/we_learn/common/VerifyToken.java=UTF-8
+encoding//src/com/we_learn/dao/HomePageDaoImpl.java=UTF-8
+encoding//src/com/we_learn/dao/QADaoImpl.java=UTF-8
 encoding//src/com/we_learn/dao/TopicDaoImp.java=UTF-8

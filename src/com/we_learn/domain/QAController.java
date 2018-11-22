@@ -26,12 +26,10 @@ import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.QADao;
 import com.we_learn.dao.QADaoImpl;
-import com.we_learn.dao.TopicDao;
-import com.we_learn.dao.TopicDaoImp;
 
-@Path("/article")
-public class TopicController extends VerifyToken{
-	public TopicController(@HeaderParam("Authorization") String token) {
+@Path("/qa")
+public class QAController extends VerifyToken{
+	public QAController(@HeaderParam("Authorization") String token) {
 		super(token);
 		// TODO Auto-generated constructor stub
 	}
@@ -47,8 +45,8 @@ public class TopicController extends VerifyToken{
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.insert(param, this.userId);
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.insert(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 	@POST
@@ -58,19 +56,19 @@ public class TopicController extends VerifyToken{
 	public Response update(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.update(param, this.userId);
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.update(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 	@PUT
 	@Path("remove")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response remove(@HeaderParam("Authorization") String token, String article) {
+	public Response remove(@HeaderParam("Authorization") String token, String qa) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.remove(article, Integer.parseInt(this.userId));
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.remove(qa, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
 
@@ -78,11 +76,11 @@ public class TopicController extends VerifyToken{
 	@Path("restore")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response restore(@HeaderParam("Authorization") String token, String article) {
+	public Response restore(@HeaderParam("Authorization") String token, String qa) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.restore(article, Integer.parseInt(this.userId));
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.restore(qa, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
@@ -90,47 +88,47 @@ public class TopicController extends VerifyToken{
 	@Path("delete")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response delete(@HeaderParam("Authorization") String token, String article) {
+	public Response delete(@HeaderParam("Authorization") String token, String qa) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.delete(article, Integer.parseInt(this.userId));
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.delete(qa, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
 	@POST
-	@Path("get-article-by-page")
+	@Path("get-qa-by-page")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTopicByPage(@HeaderParam("Authorization") String token, String param) {
+	public Response getQAByPage(@HeaderParam("Authorization") String token, String param) {
 //		if (!this.isLogined)
 //			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.getTopicByPage(param);
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.getQAByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
 	@GET
-	@Path("get-article-by-id")
+	@Path("get-qa-by-id")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+	public Response getQAById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.getArticleById(request.getParameter("article_id"));
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.getQAById(request.getParameter("qa_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
 	@GET
-	@Path("view-article-by-id")
+	@Path("view-qa-by-id")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response viewArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+	public Response viewQAById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.viewArticleById(request.getParameter("article_id"));
+		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
+		JSONObject result = qaDao.viewQAById(request.getParameter("qa_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

@@ -9,12 +9,12 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.we_learn.dao.TopicDaoImp;
+import com.we_learn.dao.QADaoImpl;
 import com.we_learn.common.MainUtility;
 
-public class TopicDaoImp implements TopicDao{
+public class QADaoImpl implements QADao{
 	private JdbcTemplate jdbcTemplate;
-	private Logger logger = Logger.getLogger(TopicDaoImp.class);
+	private Logger logger = Logger.getLogger(QADaoImpl.class);
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -29,14 +29,13 @@ public class TopicDaoImp implements TopicDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String title = jsonParams.get("article_title").toString();
-		String content = jsonParams.get("article_content").toString();
-		String type = jsonParams.get("article_type").toString();
+		String title = jsonParams.get("qa_title").toString();
+		String content = jsonParams.get("qa_content").toString();
 		
-		String query = "INSERT INTO `article`(`article_title`, `article_content`, `created_by`, `type_id`) VALUE (?,?,?,?)";
+		String query = "INSERT INTO `question_answer`(`qa_title`, `qa_content`, `created_by`) VALUE (?,?,?)";
 		//insert
 		try {
-			Object[] objects = new Object[] {title, content, user_id, type};
+			Object[] objects = new Object[] {title, content, user_id};
 			int row = this.jdbcTemplate.update(query, objects);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -55,15 +54,14 @@ public class TopicDaoImp implements TopicDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String title = jsonParams.get("article_title").toString();
-		String content = jsonParams.get("article_content").toString();
-		String type = jsonParams.get("article_type").toString();
-		String article_id = jsonParams.get("article_id").toString();
-		String query = "UPDATE `article` SET `article_title`=?, `article_content` =?,`type_id` = ?, `modify_date` =?, `modify_by` = ? WHERE `article_id` = ?";
+		String title = jsonParams.get("qa_title").toString();
+		String content = jsonParams.get("qa_content").toString();
+		String qa_id = jsonParams.get("qa_id").toString();
+		String query = "UPDATE `question_answer` SET `qa_title`=?, `qa_content` =?, `modify_date` =?, `modify_by` = ? WHERE `qa_id` = ?";
 		//insert
 		try {
 			String dateTimeNow = mainUtil.getDateFormat("yyyy-MM-dd HH:mm:ss", new Date());
-			Object[] objects = new Object[] {title, content, type, dateTimeNow, user_id, article_id};
+			Object[] objects = new Object[] {title, content, dateTimeNow, user_id, qa_id};
 			int row = this.jdbcTemplate.update(query, objects);
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -78,7 +76,7 @@ public class TopicDaoImp implements TopicDao{
 	}
 
 	@Override
-	public JSONObject getTopicByPage(String param) {
+	public JSONObject getQAByPage(String param) {
 		// TODO Auto-generated method stub
 		JSONObject data = new JSONObject();
 		JSONObject result = new JSONObject();
@@ -88,37 +86,31 @@ public class TopicDaoImp implements TopicDao{
 		StringBuilder builderGetTotal = new StringBuilder();
 		
 		builder.append(
-				"SELECT article.article_id, article.article_title, type.article_type_name, "
-						+ "article.deleted, user.full_name, "
-						+ "IF(article.created_date IS NULL,null, DATE_FORMAT(article.created_date, '%d-%m-%Y')) AS created_date FROM article "
-						+ "LEFT JOIN article_type AS type ON article.type_id = type.article_type_id "
-						+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id WHERE 1=1 ");
-		builderGetTotal.append("SELECT COUNT(1) FROM article "
-				+ "LEFT JOIN article_type AS type ON article.type_id = type.article_type_id "
-				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id ");
+				"SELECT qa.qa_id, qa.qa_title, "
+						+ "qa.deleted, user.full_name, "
+						+ "IF(qa.created_date IS NULL,null, DATE_FORMAT(qa.created_date, '%d-%m-%Y')) AS created_date FROM question_answer AS qa "
+						+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id WHERE 1=1 ");
+		builderGetTotal.append("SELECT COUNT(1) FROM question_answer AS qa "
+				+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id ");
 		// filter header
 		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
-			builder.append(" AND article.deleted <> 1");
-			builderGetTotal.append(" AND article.deleted <> 1");
+			builder.append(" AND qa.deleted <> 1");
+			builderGetTotal.append(" AND qa.deleted <> 1");
 		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
-			builder.append(" AND article.deleted = 1");
-			builderGetTotal.append(" AND article.deleted = 1");
+			builder.append(" AND qa.deleted = 1");
+			builderGetTotal.append(" AND qa.deleted = 1");
 		}
-		if (Integer.parseInt(jsonParams.get("article_type").toString()) > -1) {
-			builder.append(" AND article.type_id=" + jsonParams.get("article_type"));
-			builderGetTotal.append(" AND article.type_id=" + jsonParams.get("article_type"));
-		}
-		if (jsonParams.get("article_title") != null && !"".equals(jsonParams.get("article_title").toString())) {
-			builder.append(" AND article.article_title LIKE N'%" + jsonParams.get("article_title").toString()
+		if (jsonParams.get("qa_title") != null && !"".equals(jsonParams.get("qa_title").toString())) {
+			builder.append(" AND qa.qa_title LIKE N'%" + jsonParams.get("qa_title").toString()
 					+ "%'");
-			builderGetTotal.append(" AND article.article_title LIKE N'%"
-					+ jsonParams.get("article_title").toString() + "%'");
+			builderGetTotal.append(" AND qa.qa_title LIKE N'%"
+					+ jsonParams.get("qa_title").toString() + "%'");
 		}
 		// sortby
 		if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
 			switch (jsonParams.get("sortField").toString()) {
 			default:
-				builder.append(" ORDER BY article.created_date DESC");
+				builder.append(" ORDER BY qa.created_date DESC");
 				break;
 			}
 			// sortOrder chỉ là descend và ascend hoặc rỗng
@@ -133,9 +125,9 @@ public class TopicDaoImp implements TopicDao{
 		mainUtil.getLimitOffset(builder, jsonParams);
 		try {
 			int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
-			List<Map<String, Object>> listArticle = this.jdbcTemplate.queryForList(builder.toString());
+			List<Map<String, Object>> listQA = this.jdbcTemplate.queryForList(builder.toString());
 			JSONObject results = new JSONObject();
-			results.put("results", listArticle);
+			results.put("results", listQA);
 			results.put("total", totalRow);
 			data.put("data", results);
 			data.put("success", true);
@@ -148,12 +140,12 @@ public class TopicDaoImp implements TopicDao{
 	}
 	
 	@Override
-	public JSONObject delete(String article, int user_id) {
+	public JSONObject delete(String qa, int user_id) {
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(article);
-		String query = "DELETE FROM article WHERE article.article_id IN ("
-				+ jsonParams.get("article_id") + ")";
+		JSONObject jsonParams = mainUtil.stringToJson(qa);
+		String query = "DELETE FROM question_answer AS qa WHERE qa.qa_id IN ("
+				+ jsonParams.get("qa_id") + ")";
 		try {
 			int row = this.jdbcTemplate.update(query);
 			result.put("success", true);
@@ -166,17 +158,17 @@ public class TopicDaoImp implements TopicDao{
 	}
 
 	@Override
-	public JSONObject remove(String article, int user_id) {
+	public JSONObject remove(String qa, int user_id) {
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(article);
+		JSONObject jsonParams = mainUtil.stringToJson(qa);
 		// Sẽ phải check bên place địa điểm đã sử dụng ở bản ghi nào chưa
 		try {
-			String query = "UPDATE article SET article.deleted = 1, article.modify_date = ?, "
-					+ "article.modify_by = ? WHERE article.article_id = ?";
+			String query = "UPDATE question_answer AS qa SET qa.deleted = 1, qa.modify_date = ?, "
+					+ "qa.modify_by = ? WHERE qa.qa_id = ?";
 			int row = this.jdbcTemplate.update(query,
 					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id,
-							jsonParams.get("article_id") });
+							jsonParams.get("qa_id") });
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);
@@ -187,12 +179,12 @@ public class TopicDaoImp implements TopicDao{
 	}
 
 	@Override
-	public JSONObject restore(String article, int user_id) {
+	public JSONObject restore(String qa, int user_id) {
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(article);
-		String sql = "UPDATE article SET article.deleted = 0, article.modify_date = ?, article.modify_by = ?"
-				+ " WHERE article.article_id IN (" + jsonParams.get("article_id") + ")";
+		JSONObject jsonParams = mainUtil.stringToJson(qa);
+		String sql = "UPDATE question_answer AS qa SET qa.deleted = 0, qa.modify_date = ?, qa.modify_by = ?"
+				+ " WHERE qa.qa_id IN (" + jsonParams.get("qa_id") + ")";
 		try {
 			this.jdbcTemplate.update(sql,
 					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id });
@@ -205,39 +197,38 @@ public class TopicDaoImp implements TopicDao{
 		}
 		return result;
 	}
-	
+	//Hàm update qa by id
 	@Override
-	public JSONObject getArticleById(String article_id) {
+	public JSONObject getQAById(String qa_id) {
 		JSONObject result = new JSONObject();
-		String query = "SELECT article.type_id AS article_type, article.article_title, article.article_content "
-				+ "FROM article "
-				+ "WHERE article.article_id = " + article_id;
+		String query = "SELECT qa.qa_title, qa.qa_content "
+				+ "FROM question_answer AS qa "
+				+ "WHERE qa.qa_id = " + qa_id;
 		try {
-			Map<String, Object> articleObject = this.jdbcTemplate.queryForMap(query);
+			Map<String, Object> qaObject = this.jdbcTemplate.queryForMap(query);
 
 			result.put("success", true);
-			result.put("data", articleObject);
+			result.put("data", qaObject);
 		} catch (Exception e) {
 			result.put("success", false);
-			result.put("msg", e.getMessage());
-			// result.put("msg", "Không tồn tại loại địa điểm");
+			result.put("err", e.getMessage());
+			result.put("msg", "Không lấy được thông tin bài viết. Kiểm tra lại");
 		}
 		return result;
 	}
-	
-	//Hàm xem article by id
+	//Hàm xem qa by id
 	@Override
-	public JSONObject viewArticleById(String article_id) {
+	public JSONObject viewQAById(String qa_id) {
 		JSONObject result = new JSONObject();
-		String query = "SELECT art.article_title, art.article_content, user.full_name "
-				+ "FROM article AS art "
-				+ "LEFT JOIN crm_user AS user ON art.created_by = user.user_id "
-				+ "WHERE art.article_id = " + article_id;
+		String query = "SELECT qa.qa_title, qa.qa_content, user.user_login "
+				+ "FROM question_answer AS qa "
+				+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id "
+				+ "WHERE qa.qa_id = " + qa_id;
 		try {
-			Map<String, Object> articleObject = this.jdbcTemplate.queryForMap(query);
+			Map<String, Object> qaObject = this.jdbcTemplate.queryForMap(query);
 
 			result.put("success", true);
-			result.put("data", articleObject);
+			result.put("data", qaObject);
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
