@@ -125,8 +125,6 @@ public class QAController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewQAById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		QADao qaDao = (QADaoImpl) this.appContext.getBean("qaDao");
 		JSONObject result = qaDao.viewQAById(request.getParameter("qa_id"));
 		return Response.status(200).entity(result.toString()).build();

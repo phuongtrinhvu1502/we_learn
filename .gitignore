@@ -5,5 +5,5 @@
 /WebContent/WEB-INF/classes/config.properties
 dump.rdb
 .idea
-target
+target/
 .project

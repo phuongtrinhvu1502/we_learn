@@ -127,8 +127,6 @@ public class TopicController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
 		JSONObject result = topicDao.viewArticleById(request.getParameter("article_id"));
 		return Response.status(200).entity(result.toString()).build();
