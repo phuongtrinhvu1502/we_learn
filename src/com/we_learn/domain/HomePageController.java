@@ -50,4 +50,16 @@ public class HomePageController extends VerifyToken{
 		JSONObject result = homeDao.getNewestByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
+	
+	@POST
+	@Path("get-newest-grammar-by-page")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getNewestGrammarByPage(@HeaderParam("Authorization") String token, String param) {
+//		if (!this.isLogined)
+//			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		HomePageDao homeDao = (HomePageDaoImpl) this.appContext.getBean("homeDao");
+		JSONObject result = homeDao.getNewestGrammarByPage(param);
+		return Response.status(200).entity(result.toString()).build();
+	}
 }
