@@ -81,9 +81,9 @@ public class QACommentDaoImp implements QACommentDao{
 		String qa_id = jsonParams.get("qa_id").toString();
 		StringBuilder queryForComment = new StringBuilder();
 		queryForComment.append("SELECT t1.`qa_comment_id` AS `comment_id`, t1.`qa_comment_content` AS `comment_content`,"
-				+ "IF(t1.`created_date` IS NULL,null, DATE_FORMAT(t1.`created_date`, '%d-%m-%Y')) AS `created_date`, "
+				+ "IF(t1.`created_date` IS NULL,null, DATE_FORMAT(t1.`created_date`, '%d-%m-%Y %H:%i:%s')) AS `created_date`, "
 				+ "t2.`user_id`, t2.`user_login` FROM `qa_comment` t1 LEFT JOIN `crm_user` t2 ON t2.`user_id` = t1.`created_by` "
-				+ "WHERE `qa_id` = ? AND t2.`deleted` <> 1 ORDER BY t1.`created_date` ASC");
+				+ "WHERE `qa_id` = ? AND t2.`deleted` <> 1 ORDER BY t1.`created_date` DESC");
 		String queryForTotal = "SELECT COUNT(1) FROM `qa_comment` WHERE `qa_id` = ?";
 		mainUtil.getLimitOffset(queryForComment, jsonParams);
 		try {

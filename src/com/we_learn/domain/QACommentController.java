@@ -59,8 +59,8 @@ public class QACommentController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listCommentByPage(@HeaderParam("Authorization") String token, String param) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
+//		if (!this.isLogined)
+//			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		QACommentDao qaCommentDao = (QACommentDaoImp) this.appContext.getBean("qaCommentDao");
 		JSONObject result = qaCommentDao.listCommentByPage(param);
 		return Response.status(200).entity(result.toString()).build();

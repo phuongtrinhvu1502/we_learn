@@ -86,7 +86,7 @@ public class QADaoImpl implements QADao{
 		StringBuilder builderGetTotal = new StringBuilder();
 		
 		builder.append(
-				"SELECT qa.qa_id, qa.qa_title, "
+				"SELECT qa.qa_id, qa.qa_title, (SELECT COUNT(qa_id) FROM qa_comment WHERE qa_comment.qa_id = qa.qa_id) AS comment_number, "
 						+ "qa.deleted, user.full_name, "
 						+ "IF(qa.created_date IS NULL,null, DATE_FORMAT(qa.created_date, '%d-%m-%Y')) AS created_date FROM question_answer AS qa "
 						+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id WHERE 1=1 ");
