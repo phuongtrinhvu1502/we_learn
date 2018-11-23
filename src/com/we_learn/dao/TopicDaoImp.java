@@ -32,7 +32,7 @@ public class TopicDaoImp implements TopicDao{
 		String title = jsonParams.get("article_title").toString();
 		String content = jsonParams.get("article_content").toString();
 		String type = jsonParams.get("article_type").toString();
-		
+
 		String query = "INSERT INTO `article`(`article_title`, `article_content`, `created_by`, `type_id`) VALUE (?,?,?,?)";
 		//insert
 		try {
@@ -86,7 +86,7 @@ public class TopicDaoImp implements TopicDao{
 		JSONObject jsonParams = mainUtil.stringToJson(param);
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
-		
+
 		builder.append(
 				"SELECT article.article_id, article.article_title, type.article_type_name, "
 						+ "article.deleted, user.full_name, "
@@ -146,7 +146,7 @@ public class TopicDaoImp implements TopicDao{
 		}
 		return data;
 	}
-	
+
 	@Override
 	public JSONObject delete(String article, int user_id) {
 		JSONObject result = new JSONObject();
@@ -205,7 +205,7 @@ public class TopicDaoImp implements TopicDao{
 		}
 		return result;
 	}
-	
+
 	@Override
 	public JSONObject getArticleById(String article_id) {
 		JSONObject result = new JSONObject();
@@ -226,36 +226,25 @@ public class TopicDaoImp implements TopicDao{
 		}
 		return result;
 	}
-
+	
+	//Hàm xem article by id
 	@Override
-	public JSONObject getCommentByArticle(String param) {
-		JSONObject data = new JSONObject();
+	public JSONObject viewArticleById(String article_id) {
 		JSONObject result = new JSONObject();
-		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(param);
-		StringBuilder builder = new StringBuilder();
-		StringBuilder builderGetTotal = new StringBuilder();
-		builder.append(
-				"SELECT comment_id,DATE_FORMAT(created_date, '%H:%i %d-%m-%Y') AS `created_date`, content, "
-				+ "crm_user.full_name FROM `article_comment` LEFT JOIN crm_user ON crm_user.user_id = article_comment.user_id "
-				+ "WHERE article_id = ? ORDER BY created_date DESC");
-		builderGetTotal.append("SELECT COUNT(1) FROM article_comment WHERE `article_id` = ?");
-		
-		// lấy các biến từ table (limit, offset)
-		mainUtil.getLimitOffset(builder, jsonParams);
+		String query = "SELECT art.article_title, art.article_content, user.full_name "
+				+ "FROM article AS art "
+				+ "LEFT JOIN crm_user AS user ON art.created_by = user.user_id "
+				+ "WHERE art.article_id = " + article_id;
 		try {
-			int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
-			List<Map<String, Object>> listArticle = this.jdbcTemplate.queryForList(builder.toString());
-			JSONObject results = new JSONObject();
-			results.put("results", listArticle);
-			results.put("total", totalRow);
-			data.put("data", results);
-			data.put("success", true);
+			Map<String, Object> articleObject = this.jdbcTemplate.queryForMap(query);
+
+			result.put("success", true);
+			result.put("data", articleObject);
 		} catch (Exception e) {
-			data.put("success", false);
-			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh sách bài viết thất bại");
+			result.put("success", false);
+			result.put("err", e.getMessage());
+			result.put("msg", "Không lấy được thông tin bài viết. Kiểm tra lại");
 		}
-		return data;
+		return result;
 	}
 }

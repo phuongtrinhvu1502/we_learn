@@ -24,6 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
+import com.we_learn.dao.QADao;
+import com.we_learn.dao.QADaoImpl;
 import com.we_learn.dao.TopicDao;
 import com.we_learn.dao.TopicDaoImp;
 
@@ -83,7 +85,7 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.restore(article, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
-	
+
 	@DELETE
 	@Path("delete")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -95,7 +97,7 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.delete(article, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
-	
+
 	@POST
 	@Path("get-article-by-page")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -107,7 +109,7 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.getTopicByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
-	
+
 	@GET
 	@Path("get-article-by-id")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -119,16 +121,14 @@ public class TopicController extends VerifyToken{
 		JSONObject result = topicDao.getArticleById(request.getParameter("article_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
-	
-	@POST
-	@Path("get-comment-by-article")
+
+	@GET
+	@Path("view-article-by-id")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCommentByArticle(@HeaderParam("Authorization") String token, String param) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
+	public Response viewArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		TopicDao topicDao = (TopicDaoImp) this.appContext.getBean("topicDao");
-		JSONObject result = topicDao.getCommentByArticle(param);
+		JSONObject result = topicDao.viewArticleById(request.getParameter("article_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

@@ -9,6 +9,7 @@ public interface TopicDao {
 	public JSONObject remove(String article, int user_id);
 	public JSONObject restore(String article, int user_id);
 	public JSONObject getArticleById(String article_id);
+	public JSONObject viewArticleById(String article_id);
 	JSONObject getTopicByPage(String param);
 	JSONObject getCommentByArticle(String param);
 }

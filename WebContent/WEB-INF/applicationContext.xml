@@ -53,4 +53,13 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="topicDao" class="com.we_learn.dao.TopicDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	<bean id="qaDao" class="com.we_learn.dao.QADaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	<bean id="homeDao" class="com.we_learn.dao.HomePageDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	<bean id="qaCommentDao" class="com.we_learn.dao.QACommentDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 </beans>

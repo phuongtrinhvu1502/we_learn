@@ -104,7 +104,12 @@ public class LoginDaoImp implements LoginDao{
 	@Override
 	public JSONObject logout(String token) {
 		// TODO Auto-generated method stub
-		return null;
+		JSONObject result = new JSONObject();
+		String tokenKey = token.replaceFirst("Bearer ", "");
+		Jedis jedis = new Jedis("localhost");
+		jedis.del(tokenKey);
+		result.put("success", true);
+		result.put("data", "Bye see you again!");
+		return result;
 	}
-
 }
