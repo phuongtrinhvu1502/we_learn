@@ -247,4 +247,10 @@ public class TopicDaoImp implements TopicDao{
 		}
 		return result;
 	}
+
+	@Override
+	public JSONObject getCommentByArticle(String param) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
