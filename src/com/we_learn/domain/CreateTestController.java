@@ -24,12 +24,12 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
-import com.we_learn.dao.TestDao;
-import com.we_learn.dao.TestDaoImpl;
+import com.we_learn.dao.CreateTestDao;
+import com.we_learn.dao.CreateTestDaoImpl;
 
-@Path("/test")
-public class TestController extends VerifyToken{
-	public TestController(@HeaderParam("Authorization") String token) {
+@Path("/create-test")
+public class CreateTestController extends VerifyToken{
+	public CreateTestController(@HeaderParam("Authorization") String token) {
 		super(token);
 		// TODO Auto-generated constructor stub
 	}
@@ -45,7 +45,7 @@ public class TestController extends VerifyToken{
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TestDao testDao = (TestDaoImpl) this.appContext.getBean("testDao");
+		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
 		JSONObject result = testDao.insert(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -57,7 +57,7 @@ public class TestController extends VerifyToken{
 	public Response getTestByPage(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TestDao testDao = (TestDaoImpl) this.appContext.getBean("testDao");
+		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
 		JSONObject result = testDao.getTestByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -69,7 +69,7 @@ public class TestController extends VerifyToken{
 	public Response getTestById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		TestDao testDao = (TestDaoImpl) this.appContext.getBean("testDao");
+		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
 		JSONObject result = testDao.getTestById(request.getParameter("test_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}

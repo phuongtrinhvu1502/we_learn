@@ -13,12 +13,12 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import com.we_learn.dao.TestDaoImpl;
+import com.we_learn.dao.CreateTestDaoImpl;
 import com.we_learn.common.MainUtility;
 
-public class TestDaoImpl implements TestDao {
+public class CreateTestDaoImpl implements CreateTestDao {
 	private JdbcTemplate jdbcTemplate;
-	private Logger logger = Logger.getLogger(TestDaoImpl.class);
+	private Logger logger = Logger.getLogger(CreateTestDaoImpl.class);
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
