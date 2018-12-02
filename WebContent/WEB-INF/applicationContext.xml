@@ -65,4 +65,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="createTestDao" class="com.we_learn.dao.CreateTestDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	<bean id="testDao" class="com.we_learn.dao.TestDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 </beans>
