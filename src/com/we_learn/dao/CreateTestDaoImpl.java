@@ -1,19 +1,27 @@
 package com.we_learn.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.we_learn.dao.CreateTestDaoImpl;
+import com.mysql.jdbc.Statement;
 import com.we_learn.common.MainUtility;
 
 public class CreateTestDaoImpl implements CreateTestDao {
@@ -29,7 +37,7 @@ public class CreateTestDaoImpl implements CreateTestDao {
 	}
 
 	@Override
-	public JSONObject insert(String param, String user_id) {
+	public JSONObject insert(String param, int user_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
@@ -38,16 +46,97 @@ public class CreateTestDaoImpl implements CreateTestDao {
 		// TransactionStatus txStatus = this.transactionManager.getTransaction(txDef);
 		// insert
 
-		String sqlInsertTest = "INSERT INTO test (test_name, test_type, create_date, create_by, deleted)"
+		String sqlInsertTest = "INSERT INTO test (test_name, test_type, created_date, created_by, deleted)"
 				+ " VALUES (?,?,?,?,?)";
 		String sqlInsertTestQuestion = "INSERT INTO test_question (test_id, tq_content,"
-				+ " create_date, create_by, deleted)" + " VALUES (?,?,?,?,?)";
-		String sqlInsertTestAnswer = "INSERT INTO test_answer (tq_id, ta_content,"
-				+ " create_date, create_by, deleted)" + " VALUES (?,?,?,?,?)";
+				+ " created_date, created_by, deleted)" + " VALUES (?,?,?,?,?)";
+		String sqlInsertTestAnswer = "INSERT INTO test_answer (tq_id, ta_content," + " created_date, created_by, deleted)"
+				+ " VALUES (?,?,?,?,?)";
+		String sqlInsertCorrectAnswer = "INSERT INTO correct_answer (test_id, tq_id, ta_id,"
+				+ " created_date, created_by, deleted)" + " VALUES (?,?,?,?,?,?)";
 		try {
+			KeyHolder holder = new GeneratedKeyHolder();
+			int rowTest = this.jdbcTemplate.update(new PreparedStatementCreator() {
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement ps = connection.prepareStatement(sqlInsertTest, Statement.RETURN_GENERATED_KEYS);
+					int count = 1;
+					mainUtil.setParamJSONObject(ps, jsonParams, "test_name", "string", count++);
+					// Tạm set type = 1 (bài kiểm tra reading)
+					ps.setInt(count++, 1);
+					ps.setString(count++, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+					ps.setInt(count++, user_id);
+					ps.setInt(count++, 0);
+					return ps;
+				}
+			}, holder);
 
-			// Object[] objects = new Object[] {title, content, user_id, type};
-			// int row = this.jdbcTemplate.update(query, objects);
+			// Insert test_question
+			JSONArray lstQuestion = (JSONArray) jsonParams.get("lstQuestion");
+			GeneratedKeyHolder quesHolder;
+			for (Object questionObj : lstQuestion) {
+				JSONObject question = (JSONObject) questionObj;
+				quesHolder = new GeneratedKeyHolder();
+				int rowQues = this.jdbcTemplate.update(new PreparedStatementCreator() {
+					@Override
+					public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+						PreparedStatement statement = con.prepareStatement(sqlInsertTestQuestion,
+								Statement.RETURN_GENERATED_KEYS);
+						int count = 1;
+						statement.setInt(count++, holder.getKey().intValue());
+						mainUtil.setParamJSONObject(statement, question, "tq_content", "string", count++);
+						statement.setString(count++, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+						statement.setInt(count++, user_id);
+						statement.setInt(count++, 0);
+						return statement;
+					}
+				}, quesHolder);
+
+				int questionHolder = quesHolder.getKey().intValue();
+				JSONArray lst_answer = (JSONArray) question.get("lst_answer");
+				GeneratedKeyHolder answerHolder;
+				for (Object ansObj : lst_answer) {
+					JSONObject answer = (JSONObject) ansObj;
+					answerHolder = new GeneratedKeyHolder();
+					int rowAns = this.jdbcTemplate.update(new PreparedStatementCreator() {
+						@Override
+						public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+							PreparedStatement statement = con.prepareStatement(sqlInsertTestAnswer,
+									Statement.RETURN_GENERATED_KEYS);
+							int count = 1;
+							statement.setInt(count++, questionHolder);
+							mainUtil.setParamJSONObject(statement, answer, "ta_content", "string", count++);
+							statement.setString(count++,
+									mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+							statement.setInt(count++, user_id);
+							statement.setInt(count++, 0);
+							return statement;
+						}
+					}, answerHolder);
+
+					if (Integer.parseInt(question.get("correct_answer").toString()) == Integer
+							.parseInt(answer.get("index").toString())) {
+						int ansHolder = answerHolder.getKey().intValue();
+						KeyHolder correctAnswerHolder = new GeneratedKeyHolder();
+						int rowCorrect = this.jdbcTemplate.update(new PreparedStatementCreator() {
+							@Override
+							public PreparedStatement createPreparedStatement(Connection connection)
+									throws SQLException {
+								PreparedStatement ps = connection.prepareStatement(sqlInsertCorrectAnswer,
+										Statement.RETURN_GENERATED_KEYS);
+								int count = 1;
+								ps.setInt(count++, holder.getKey().intValue());
+								ps.setInt(count++, questionHolder);
+								ps.setInt(count++, ansHolder);
+								ps.setString(count++, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+								ps.setInt(count++, user_id);
+								ps.setInt(count++, 0);
+								return ps;
+							}
+						}, correctAnswerHolder);
+					}
+				}
+			}
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -56,7 +145,6 @@ public class CreateTestDaoImpl implements CreateTestDao {
 			return result;
 		}
 		result.put("success", true);
-		result.put("msg", "Article create success");
 		return result;
 	}
 
@@ -70,36 +158,36 @@ public class CreateTestDaoImpl implements CreateTestDao {
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 
-		builder.append("SELECT article.article_id, article.article_title, type.article_type_name, "
-				+ "article.deleted, user.full_name, "
-				+ "IF(article.created_date IS NULL,null, DATE_FORMAT(article.created_date, '%d-%m-%Y')) AS created_date FROM article "
-				+ "LEFT JOIN article_type AS type ON article.type_id = type.article_type_id "
-				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id WHERE 1=1 ");
-		builderGetTotal.append("SELECT COUNT(1) FROM article "
-				+ "LEFT JOIN article_type AS type ON article.type_id = type.article_type_id "
-				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id ");
+		builder.append("SELECT test.test_id, test.test_name, "
+				+ "test.deleted, user.full_name, "
+				+ "(SELECT COUNT(test_question.tq_id) FROM test_question "
+				+ "WHERE test_question.test_id = test.test_id) AS question_number, "
+				+ "IF(test.created_date IS NULL,null, DATE_FORMAT(test.created_date, '%d-%m-%Y')) AS created_date FROM test "
+				+ "LEFT JOIN crm_user AS user ON test.created_by = user.user_id WHERE 1=1 ");
+		builderGetTotal.append("SELECT COUNT(1) FROM test "
+				+ "LEFT JOIN crm_user AS user ON test.created_by = user.user_id ");
 		// filter header
-		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
-			builder.append(" AND article.deleted <> 1");
-			builderGetTotal.append(" AND article.deleted <> 1");
-		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
-			builder.append(" AND article.deleted = 1");
-			builderGetTotal.append(" AND article.deleted = 1");
-		}
-		if (Integer.parseInt(jsonParams.get("article_type").toString()) > -1) {
-			builder.append(" AND article.type_id=" + jsonParams.get("article_type"));
-			builderGetTotal.append(" AND article.type_id=" + jsonParams.get("article_type"));
-		}
-		if (jsonParams.get("article_title") != null && !"".equals(jsonParams.get("article_title").toString())) {
-			builder.append(" AND article.article_title LIKE N'%" + jsonParams.get("article_title").toString() + "%'");
+//		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
+//			builder.append(" AND article.deleted <> 1");
+//			builderGetTotal.append(" AND article.deleted <> 1");
+//		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
+//			builder.append(" AND article.deleted = 1");
+//			builderGetTotal.append(" AND article.deleted = 1");
+//		}
+//		if (Integer.parseInt(jsonParams.get("article_type").toString()) > -1) {
+//			builder.append(" AND article.type_id=" + jsonParams.get("article_type"));
+//			builderGetTotal.append(" AND article.type_id=" + jsonParams.get("article_type"));
+//		}
+		if (jsonParams.get("test_name") != null && !"".equals(jsonParams.get("test_name").toString())) {
+			builder.append(" AND test.test_name LIKE N'%" + jsonParams.get("test_name").toString() + "%'");
 			builderGetTotal
-					.append(" AND article.article_title LIKE N'%" + jsonParams.get("article_title").toString() + "%'");
+					.append(" AND test.test_name LIKE N'%" + jsonParams.get("test_name").toString() + "%'");
 		}
 		// sortby
 		if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
 			switch (jsonParams.get("sortField").toString()) {
 			default:
-				builder.append(" ORDER BY article.created_date DESC");
+				builder.append(" ORDER BY test.created_date DESC");
 				break;
 			}
 			// sortOrder chỉ là descend và ascend hoặc rỗng
@@ -114,33 +202,48 @@ public class CreateTestDaoImpl implements CreateTestDao {
 		mainUtil.getLimitOffset(builder, jsonParams);
 		try {
 			int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
-			List<Map<String, Object>> listArticle = this.jdbcTemplate.queryForList(builder.toString());
+			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(builder.toString());
 			JSONObject results = new JSONObject();
-			results.put("results", listArticle);
+			results.put("results", listTest);
 			results.put("total", totalRow);
 			data.put("data", results);
 			data.put("success", true);
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh sách bài viết thất bại");
+			data.put("msg", "Lấy danh sách đề thi thất bại");
 		}
 		return data;
 	}
 
 	@Override
-	public JSONObject getTestById(String article_id) {
+	public JSONObject getTestById(String test_id) {
 		JSONObject result = new JSONObject();
-		String query = "SELECT article.type_id AS article_type, article.article_title, article.article_content "
-				+ "FROM article " + "WHERE article.article_id = " + article_id;
-		String queryForComments = "SELECT comment_id,DATE_FORMAT(created_date, '%H:%i %d-%m-%Y') AS `created_date`, content, crm_user.full_name FROM `article_comment` LEFT JOIN crm_user ON crm_user.user_id = article_comment.user_id WHERE article_id = ? ORDER BY created_date DESC";
+		String queryTestInfo = "SELECT test.test_name FROM test "
+				+ "WHERE test.test_id = " + test_id;
+		String queryTestQuestionData = "SELECT tq_id, test_id, tq_content FROM test_question "
+				+ "WHERE test_id = " + test_id ;
 		try {
-			Map<String, Object> articleObject = this.jdbcTemplate.queryForMap(query);
-			// List<Map<String, Object>> listComments =
-			// this.jdbcTemplate.queryForList(queryForComments, new Object[] {article_id});
+			Map<String, Object> testObject = this.jdbcTemplate.queryForMap(queryTestInfo);
+			List<Map<String, Object>> lstTestQuesData = this.jdbcTemplate.queryForList(queryTestQuestionData.toString());
+			String queryForLstAnswer = "SELECT tq_id, ta_id, ta_content, ta_id AS rowKey "
+					+ "FROM test_answer "
+					+ "WHERE tq_id = ?";
+			String queryForCorrectAnswer = "SELECT ta_id FROM correct_answer "
+					+ "WHERE correct_answer.tq_id = ?";
+			for (Map<String, Object> question : lstTestQuesData) {
+				question.put("lst_answer", this.jdbcTemplate.queryForList(queryForLstAnswer,
+						new Object[] { question.get("tq_id").toString() }));
+				Map<String, Object> correct_answer = this.jdbcTemplate.queryForMap(queryForCorrectAnswer,
+						new Object[] { question.get("tq_id").toString() });
+				question.put("correct_answer", correct_answer.get("ta_id"));
+			}
+			
+			JSONObject data = new JSONObject();
+			data.put("testObject", testObject);
+			data.put("lstQuestion", lstTestQuesData);
 			result.put("success", true);
-			result.put("data", articleObject);
-			// result.put("comments", listComments);
+			result.put("data", data);
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("msg", e.getMessage());

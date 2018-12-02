@@ -45,8 +45,8 @@ public class CreateTestController extends VerifyToken{
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
-		JSONObject result = testDao.insert(param, this.userId);
+		CreateTestDao createTestDao = (CreateTestDaoImpl) this.appContext.getBean("createTestDao");
+		JSONObject result = createTestDao.insert(param, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
 
@@ -57,8 +57,8 @@ public class CreateTestController extends VerifyToken{
 	public Response getTestByPage(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
-		JSONObject result = testDao.getTestByPage(param);
+		CreateTestDao createTestDao = (CreateTestDaoImpl) this.appContext.getBean("createTestDao");
+		JSONObject result = createTestDao.getTestByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
 
@@ -69,8 +69,8 @@ public class CreateTestController extends VerifyToken{
 	public Response getTestById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		CreateTestDao testDao = (CreateTestDaoImpl) this.appContext.getBean("testDao");
-		JSONObject result = testDao.getTestById(request.getParameter("test_id"));
+		CreateTestDao createTestDao = (CreateTestDaoImpl) this.appContext.getBean("createTestDao");
+		JSONObject result = createTestDao.getTestById(request.getParameter("test_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

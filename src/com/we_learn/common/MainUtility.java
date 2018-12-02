@@ -1,8 +1,11 @@
 package com.we_learn.common;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -88,5 +91,73 @@ public class MainUtility {
 			return result;
 		}
 		return result;
+	}
+	
+	public void setParamJSONObject(PreparedStatement ps, JSONObject obj, String column, String type, int count)
+			throws NumberFormatException, SQLException {
+		switch (type.toLowerCase()) {
+		case "int":
+			if (obj.get(column) != null) {
+				ps.setInt(count, Integer.parseInt(obj.get(column).toString()));
+			} else {
+				ps.setNull(count, java.sql.Types.INTEGER);
+			}
+			break;
+		case "double":
+			if (obj.get(column) != null) {
+				ps.setDouble(count, Double.parseDouble(obj.get(column).toString()));
+			} else {
+				ps.setNull(count, java.sql.Types.DOUBLE);
+			}
+			break;
+		case "boolean":
+			if (obj.get(column) != null && Boolean.parseBoolean(obj.get(column).toString())) {
+				ps.setInt(count, 1);
+			} else {
+				ps.setInt(count, 0);
+			}
+			break;
+		default:
+			if (obj.get(column) != null) {
+				ps.setString(count, obj.get(column).toString());
+			} else {
+				ps.setNull(count, java.sql.Types.NVARCHAR);
+			}
+			break;
+		}
+	}
+
+	public void setParamMapObject(PreparedStatement ps, Map<String, Object> obj, String column, String type, int count)
+			throws NumberFormatException, SQLException {
+		switch (type.toLowerCase()) {
+		case "int":
+			if (obj.get(column) != null) {
+				ps.setInt(count, Integer.parseInt(obj.get(column).toString()));
+			} else {
+				ps.setNull(count, java.sql.Types.INTEGER);
+			}
+			break;
+		case "double":
+			if (obj.get(column) != null) {
+				ps.setDouble(count, Double.parseDouble(obj.get(column).toString()));
+			} else {
+				ps.setNull(count, java.sql.Types.DOUBLE);
+			}
+			break;
+		case "boolean":
+			if (obj.get(column) != null && (boolean) obj.get(column)) {
+				ps.setInt(count, 1);
+			} else {
+				ps.setInt(count, 0);
+			}
+			break;
+		default:
+			if (obj.get(column) != null) {
+				ps.setString(count, obj.get(column).toString());
+			} else {
+				ps.setNull(count, java.sql.Types.NVARCHAR);
+			}
+			break;
+		}
 	}
 }
