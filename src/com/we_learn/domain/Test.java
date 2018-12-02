@@ -58,8 +58,7 @@ public class Test extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListTest(@HeaderParam("Authorization") String token, String param) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		
 		TestDao testDao = (TestDaoImp) this.appContext.getBean("testDao");
 		JSONObject result = testDao.getAll();
 		return Response.status(200).entity(result.toString()).build();
