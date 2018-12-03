@@ -24,6 +24,13 @@ public class ArticleDaoImp implements ArticleDao{
 	@Override
 	public JSONObject insert(String param, String user_id) {
 		// TODO Auto-generated method stub
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String title = jsonParams.get("title").toString();
+		String type_id = jsonParams.get("type_id").toString();
+		
+		String query = "INSERT INTO `article`(`article_title`, `type_id`, `article_content`, `created_by`) VALUES (?,?,?,?)";
 		return null;
 	}
 

@@ -68,4 +68,13 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="testDao" class="com.we_learn.dao.TestDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	<bean id="articleDao" class="com.we_learn.dao.ArticleDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	<bean id="articleTopicDao" class="com.we_learn.dao.ArticleTopicDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
+	<bean id="articleTopicContentDao" class="com.we_learn.dao.ArticleTopicContentDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 </beans>

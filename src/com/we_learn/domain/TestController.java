@@ -20,8 +20,8 @@ import com.we_learn.dao.TestDao;
 import com.we_learn.dao.TestDaoImp;
 
 @Path("/test")
-public class Test extends VerifyToken{
-	public Test(@HeaderParam("Authorization") String token) {
+public class TestController extends VerifyToken{
+	public TestController(@HeaderParam("Authorization") String token) {
 		super(token);
 		// TODO Auto-generated constructor stub
 	}
