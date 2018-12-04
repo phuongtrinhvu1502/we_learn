@@ -8,4 +8,6 @@ public interface ArticleDao {
 	JSONObject delete(String param, String user_id);
 	JSONObject remove(String param, String user_id);
 	JSONObject getListArticleByType(String param);
+	JSONObject getArticleByPage(String param);
+	JSONObject getArticleById(String param);
 }
