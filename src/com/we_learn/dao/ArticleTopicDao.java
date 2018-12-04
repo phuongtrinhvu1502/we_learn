@@ -7,4 +7,6 @@ public interface ArticleTopicDao {
 	JSONObject update(String param, String user_id);
 	JSONObject delete(String param, String user_id);
 	JSONObject remove(String param, String user_id);
+	JSONObject getTopicByPage(String param);
+	JSONObject getTopicById(String user_id);
 }
