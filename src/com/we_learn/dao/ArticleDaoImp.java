@@ -1,5 +1,6 @@
 package com.we_learn.dao;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -30,14 +31,42 @@ public class ArticleDaoImp implements ArticleDao{
 		String title = jsonParams.get("title").toString();
 		String type_id = jsonParams.get("type_id").toString();
 		
-		String query = "INSERT INTO `article`(`article_title`, `type_id`, `article_content`, `created_by`) VALUES (?,?,?,?)";
-		return null;
+		String query = "INSERT INTO `article`(`article_title`, `type_id`, `created_by`) VALUES (?,?,?)";
+		try {
+			int row = this.jdbcTemplate.update(query, new Object[] {title, type_id, user_id});
+		} catch (Exception e) {
+			// TODO: handle exception
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			return result;
+		}
+		result.put("success", true);
+		result.put("msg", "Insert thanh cong");
+		return result;
 	}
 
 	@Override
 	public JSONObject update(String param, String user_id) {
 		// TODO Auto-generated method stub
-		return null;
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String title = jsonParams.get("title").toString();
+		String type_id = jsonParams.get("type_id").toString();
+		String article_id = jsonParams.get("article_id").toString();
+		String query = "UPDATE `article` SET `article_title`=?,`type_id`=?,`modify_date`=?,`modify_by`=? WHERE `article_id` = ?";
+		try {
+			String dateTimeNow = mainUtil.getDateFormat("yyyy-MM-dd HH:mm:ss", new Date());
+			int row = this.jdbcTemplate.update(query, new Object[] {title, type_id,dateTimeNow, user_id, article_id});
+		} catch (Exception e) {
+			// TODO: handle exception
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			return result;
+		}
+		result.put("success", true);
+		result.put("msg", "Update thanh cong");
+		return result;
 	}
 
 	@Override
