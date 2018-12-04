@@ -50,9 +50,6 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="loginDao" class="com.we_learn.dao.LoginDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
-	<bean id="topicDao" class="com.we_learn.dao.TopicDaoImp">
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
-	</bean>
 	<bean id="qaDao" class="com.we_learn.dao.QADaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
