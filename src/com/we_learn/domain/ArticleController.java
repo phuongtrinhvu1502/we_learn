@@ -111,7 +111,7 @@ public class ArticleController extends VerifyToken{
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
-		JSONObject result = articleDao.getArticleById(request.getParameter("atc_id"));
+		JSONObject result = articleDao.getArticleById(request.getParameter("article_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

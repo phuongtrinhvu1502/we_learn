@@ -28,7 +28,7 @@ public class ArticleDaoImp implements ArticleDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String title = jsonParams.get("title").toString();
+		String title = jsonParams.get("article_title").toString();
 		String type_id = jsonParams.get("type_id").toString();
 		
 		String query = "INSERT INTO `article`(`article_title`, `type_id`, `created_by`) VALUES (?,?,?)";
@@ -51,7 +51,7 @@ public class ArticleDaoImp implements ArticleDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String title = jsonParams.get("title").toString();
+		String title = jsonParams.get("article_title").toString();
 		String type_id = jsonParams.get("type_id").toString();
 		String article_id = jsonParams.get("article_id").toString();
 		String query = "UPDATE `article` SET `article_title`=?,`type_id`=?,`modify_date`=?,`modify_by`=? WHERE `article_id` = ?";
@@ -124,21 +124,27 @@ public class ArticleDaoImp implements ArticleDao{
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 
-		builder.append("SELECT `article_id`, `article_content`, DATE_FORMAT(created_date, '%d-%m-%Y')) AS created_date FROM `article` WHERE 1=1");
-		builderGetTotal.append("SELECT COUNT(1) FROM article_topic_content AS atc "
-				+ "LEFT JOIN article_topic AS topic ON atc.at_id = topic.at_id "
-				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id ");
+		builder.append("SELECT `article_id`, `article_content`,  article_title, "
+				+ "DATE_FORMAT(article.created_date, '%d-%m-%Y') AS created_date, "
+				+ "user.full_name, article_type.article_type_name "
+				+ "FROM `article` "
+				+ "LEFT JOIN article_type ON article.type_id = article_type.article_type_id "
+				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id "
+				+ "WHERE 1=1");
+		builderGetTotal.append("SELECT COUNT(1) FROM article "
+				+ "LEFT JOIN article_type ON article.type_id = article_type.article_type_id "
+				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id WHERE 1=1");
 		// filter header
 		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
-			builder.append(" AND deleted <> 1");
-			builderGetTotal.append(" AND deleted <> 1");
+			builder.append(" AND article.deleted <> 1");
+			builderGetTotal.append(" AND article.deleted <> 1");
 		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
-			builder.append(" AND deleted = 1");
-			builderGetTotal.append(" AND deleted = 1");
+			builder.append(" AND article.deleted = 1");
+			builderGetTotal.append(" AND article.deleted = 1");
 		}
 		if (Integer.parseInt(jsonParams.get("type_id").toString()) > -1) {
-			builder.append(" AND type_id=" + jsonParams.get("type_id"));
-			builderGetTotal.append(" AND type_id=" + jsonParams.get("type_id"));
+			builder.append(" AND article.type_id=" + jsonParams.get("type_id"));
+			builderGetTotal.append(" AND article.type_id=" + jsonParams.get("type_id"));
 		}
 		if (jsonParams.get("article_title") != null && !"".equals(jsonParams.get("article_title").toString())) {
 			builder.append(" AND article_title LIKE N'%" + jsonParams.get("article_title").toString() + "%'");
@@ -152,15 +158,13 @@ public class ArticleDaoImp implements ArticleDao{
 				builder.append(" ORDER BY created_date DESC");
 				break;
 			}
-			// sortOrder chỉ là descend và ascend hoặc rỗng
-			if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
-				builder.append(" DESC");
-			}
-			if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
-				builder.append(" ASC");
-			}
+//			if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
+//				builder.append(" DESC");
+//			}
+//			if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
+//				builder.append(" ASC");
+//			}
 		}
-		// lấy các biến từ table (limit, offset)
 		mainUtil.getLimitOffset(builder, jsonParams);
 		try {
 			int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
@@ -173,7 +177,7 @@ public class ArticleDaoImp implements ArticleDao{
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh sách bài viết thất bại");
+			data.put("msg", "Lấy danh mục thất bại");
 		}
 		return data;
 	}

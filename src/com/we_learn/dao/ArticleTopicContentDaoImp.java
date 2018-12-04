@@ -121,12 +121,12 @@ public class ArticleTopicContentDaoImp implements ArticleTopicContentDao {
 				break;
 			}
 			// sortOrder chỉ là descend và ascend hoặc rỗng
-			if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
-				builder.append(" DESC");
-			}
-			if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
-				builder.append(" ASC");
-			}
+//			if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
+//				builder.append(" DESC");
+//			}
+//			if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
+//				builder.append(" ASC");
+//			}
 		}
 		// lấy các biến từ table (limit, offset)
 		mainUtil.getLimitOffset(builder, jsonParams);
