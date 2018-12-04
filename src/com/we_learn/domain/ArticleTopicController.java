@@ -63,7 +63,7 @@ public class ArticleTopicController extends VerifyToken{
 	public Response getTopicByPage(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleDao");
+		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleTopicDao");
 		JSONObject result = articleTopicDao.getTopicByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -75,7 +75,7 @@ public class ArticleTopicController extends VerifyToken{
 	public Response getArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleDao");
+		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleTopicDao");
 		JSONObject result = articleTopicDao.getTopicById(request.getParameter("at_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}

@@ -95,7 +95,7 @@ public class ArticleTopicContentDaoImp implements ArticleTopicContentDao {
 				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id WHERE 1=1 ");
 		builderGetTotal.append("SELECT COUNT(1) FROM article_topic_content AS atc "
 				+ "LEFT JOIN article_topic AS topic ON atc.at_id = topic.at_id "
-				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id ");
+				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id WHERE 1=1 ");
 		// filter header
 		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
 			builder.append(" AND atc.deleted <> 1");
