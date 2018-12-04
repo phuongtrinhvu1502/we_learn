@@ -1,7 +1,9 @@
 package com.we_learn.domain;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -52,6 +54,29 @@ public class ArticleTopicController extends VerifyToken{
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleTopicDao");
 		JSONObject result = articleTopicDao.update(param, this.userId);
+		return Response.status(200).entity(result.toString()).build();
+	}
+	@POST
+	@Path("get-topic-by-page")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getTopicByPage(@HeaderParam("Authorization") String token, String param) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleTopicDao.getTopicByPage(param);
+		return Response.status(200).entity(result.toString()).build();
+	}
+
+	@GET
+	@Path("get-topic-by-id")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getArticleById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleTopicDao.getTopicById(request.getParameter("at_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }
