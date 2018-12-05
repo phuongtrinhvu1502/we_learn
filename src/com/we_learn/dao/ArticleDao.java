@@ -10,4 +10,5 @@ public interface ArticleDao {
 	JSONObject getListArticleByType(String param);
 	JSONObject getArticleByPage(String param);
 	JSONObject getArticleById(String param);
+	JSONObject getAllListArticle();
 }

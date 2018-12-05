@@ -9,4 +9,5 @@ public interface ArticleTopicDao {
 	JSONObject remove(String param, String user_id);
 	JSONObject getTopicByPage(String param);
 	JSONObject getTopicById(String user_id);
+	JSONObject getAllListArticleTopic();
 }

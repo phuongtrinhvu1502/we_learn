@@ -108,8 +108,8 @@ public class ArticleTopicDaoImp implements ArticleTopicDao{
 			builderGetTotal.append(" AND at.deleted = 1");
 		}
 		if (Integer.parseInt(jsonParams.get("article_id").toString()) > -1) {
-			builder.append(" AND article.article_id=" + jsonParams.get("type_id"));
-			builderGetTotal.append(" AND article.article_id=" + jsonParams.get("type_id"));
+			builder.append(" AND article.article_id=" + jsonParams.get("article_id"));
+			builderGetTotal.append(" AND article.article_id=" + jsonParams.get("article_id"));
 		}
 		if (jsonParams.get("at_title") != null && !"".equals(jsonParams.get("at_title").toString())) {
 			builder.append(" AND at.at_title LIKE N'%" + jsonParams.get("at_title").toString() + "%'");
@@ -156,6 +156,21 @@ public class ArticleTopicDaoImp implements ArticleTopicDao{
 			Map<String, Object> articleTopicObject = this.jdbcTemplate.queryForMap(query);
 			result.put("success", true);
 			result.put("data", articleTopicObject);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+	
+	@Override
+	public JSONObject getAllListArticleTopic() {
+		JSONObject result = new JSONObject();
+		String query = "SELECT `at_id`,`at_title` FROM `article_topic` WHERE deleted <> 1";
+		try {
+			List<Map<String, Object>> lstArticleTopic = this.jdbcTemplate.queryForList(query);
+			result.put("success", true);
+			result.put("data", lstArticleTopic);
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("msg", e.getMessage());

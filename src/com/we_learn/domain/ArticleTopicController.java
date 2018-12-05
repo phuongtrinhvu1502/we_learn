@@ -18,6 +18,8 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.VerifyToken;
+import com.we_learn.dao.ArticleDao;
+import com.we_learn.dao.ArticleDaoImp;
 import com.we_learn.dao.ArticleTopicDao;
 import com.we_learn.dao.ArticleTopicDaoImp;
 
@@ -77,6 +79,18 @@ public class ArticleTopicController extends VerifyToken{
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleTopicDao");
 		JSONObject result = articleTopicDao.getTopicById(request.getParameter("at_id"));
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@GET
+	@Path("get-all-list-article-topic")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllListArticleTopic(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleTopicDao articleTopicDao = (ArticleTopicDaoImp) this.appContext.getBean("articleTopicDao");
+		JSONObject result = articleTopicDao.getAllListArticleTopic();
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

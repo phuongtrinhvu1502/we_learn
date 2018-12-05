@@ -196,4 +196,19 @@ public class ArticleDaoImp implements ArticleDao{
 		}
 		return result;
 	}
+	
+	@Override
+	public JSONObject getAllListArticle() {
+		JSONObject result = new JSONObject();
+		String query = "SELECT `article_title`,`article_id` FROM `article` WHERE deleted <> 1";
+		try {
+			List<Map<String, Object>> lstArticle = this.jdbcTemplate.queryForList(query);
+			result.put("success", true);
+			result.put("data", lstArticle);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
 }
