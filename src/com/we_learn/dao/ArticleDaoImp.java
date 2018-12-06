@@ -88,7 +88,7 @@ public class ArticleDaoImp implements ArticleDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String article_type_id = jsonParams.get("article_type_id").toString();
+		String article_type_id = jsonParams.get("type_id").toString();
 		String queryForListArticle = "SELECT `article_id`, `article_title`, `article_content` FROM `article` WHERE `type_id` = ? AND `deleted` <> 1";
 		try {
 			List<Map<String, Object>> listArticle = this.jdbcTemplate.queryForList(queryForListArticle, new Object[] {article_type_id});

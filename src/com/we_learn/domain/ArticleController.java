@@ -79,17 +79,17 @@ public class ArticleController extends VerifyToken{
 //		return Response.status(200).entity(result.toString()).build();
 //	}
 
-//	@DELETE
-//	@Path("delete")
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	@Produces(MediaType.APPLICATION_JSON)
-//	public Response delete(@HeaderParam("Authorization") String token, String article) {
+	@POST
+	@Path("get-list-article-by-type")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getListArticleByType(@HeaderParam("Authorization") String token, String article) {
 //		if (!this.isLogined)
 //			return Response.status(200).entity(this.notFoundUser().toString()).build();
-//		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
-//		JSONObject result = articleDao.delete(article, Integer.parseInt(this.userId));
-//		return Response.status(200).entity(result.toString()).build();
-//	}
+		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleDao.getListArticleByType(article);
+		return Response.status(200).entity(result.toString()).build();
+	}
 
 	@POST
 	@Path("get-article-by-page")
