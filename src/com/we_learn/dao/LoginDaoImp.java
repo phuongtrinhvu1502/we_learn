@@ -66,7 +66,7 @@ public class LoginDaoImp implements LoginDao {
 		}
 
 		String query = "SELECT crm_user.*, crm_group.group_code FROM crm_user LEFT JOIN crm_group ON crm_user.group_id = crm_group.group_id"
-				+ " WHERE user_login = ? AND password = ?";
+				+ " WHERE user_login = ? AND password = ? AND active_status = 1";
 		try {
 			Map<String, Object> user = this.jdbcTemplate.queryForMap(query,
 					new Object[] { jsonParams.get("username").toString(), passwordMd5 });

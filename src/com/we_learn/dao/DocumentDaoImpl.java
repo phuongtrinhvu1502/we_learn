@@ -33,7 +33,7 @@ public class DocumentDaoImpl implements DocumentDao {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		String sqlInsertDoc = "INSERT INTO `wl_document`(`file_name`,`file_path`, create_date, `created_by`) VALUES (?,?,?,?)";
+		String sqlInsertDoc = "INSERT INTO `wl_document`(`file_name`,`file_path`, create_date, `create_by`) VALUES (?,?,?,?)";
 		// insert
 		try {
 			GeneratedKeyHolder holder = new GeneratedKeyHolder();
@@ -43,7 +43,7 @@ public class DocumentDaoImpl implements DocumentDao {
 					PreparedStatement ps = connection.prepareStatement(sqlInsertDoc, Statement.RETURN_GENERATED_KEYS);
 					int count = 1;
 					mainUtil.setParam(ps, jsonParams.get("file_name"), "string", count++);
-					mainUtil.setParam(ps, jsonParams.get("file_path"), "int", count++);
+					mainUtil.setParam(ps, jsonParams.get("file_path"), "string", count++);
 					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
 							count++);
 					mainUtil.setParam(ps, user_id, "int", count++);

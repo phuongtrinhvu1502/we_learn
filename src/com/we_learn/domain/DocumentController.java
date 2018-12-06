@@ -57,7 +57,9 @@ public class DocumentController extends VerifyToken {
 			fileObj.put("file_name", fileName);
 			fileObj.put("file_path", DOC_PATH + fileName);
 			result = doc.insert(fileObj, this.userId);
-			result.put("url_document", mainUtil.initUrlDocument(context, fileObj.get("file_path").toString()));
+			if (Boolean.parseBoolean(result.get("success").toString())) {
+				result.put("url_document", mainUtil.initUrlDocument(context, fileObj.get("file_path").toString()));
+			}
 		} else {
 			result.put("success", false);
 			result.put("msg", "Upload failed!");
