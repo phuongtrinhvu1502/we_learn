@@ -42,12 +42,12 @@ public class DocumentController extends VerifyToken {
 
 	@POST
 	@Path("insert")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response insert(@HeaderParam("Authorization") String token,
 			@FormDataParam("attachment") FormDataBodyPart file) {
-		// if (!this.isLogined)
-		// return Response.status(200).entity(this.notFoundUser().toString()).build();
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		JSONObject result = new JSONObject();
 		DocumentDao doc = (DocumentDaoImpl) this.appContext.getBean("documentDao");
 		MainUtility mainUtil = new MainUtility();

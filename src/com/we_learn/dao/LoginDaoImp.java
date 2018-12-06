@@ -140,7 +140,7 @@ public class LoginDaoImp implements LoginDao {
 					+ jsonParams.get("user_login").toString() + "'))";
 			if (this.jdbcTemplate.queryForObject(sqlCheckExists, Integer.class) == 1) {
 				result.put("success", false);
-				result.put("msg", "Tài khoản đã tồn tại! Kiểm tra lại");
+				result.put("msg", "Tài khoản đã tồn tại. Kiểm tra lại");
 				return result;
 			}
 			String password = jsonParams.get("password").toString();
@@ -174,22 +174,22 @@ public class LoginDaoImp implements LoginDao {
 				}
 			}, holder);
 			if (holder.getKey().intValue() > 0) {
-				// gửi mail active
+				// gá»­i mail active
 				String subject = "Thông báo kích hoạt tài khoản: " + jsonParams.get("user_login");
 				StringBuilder content;
 				content = new StringBuilder();
-				content.append("Click vào <a href='" + rootUrl + "#/active-account?user="
+				content.append("Click <a href='" + rootUrl + "#/active-account?user="
 						+ jsonParams.get("user_login").toString() + "&code=" + codeActive
-						+ "'> đây </a> để kích hoạt tài khoản.");
+						+ "'> Tại đây </a> Để kích hoạt tài khoản.");
 				this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
 				result.put("success", true);
 			} else {
 				result.put("success", false);
-				result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+				result.put("msg", "Xảy ra lỗi khi kích hoạt tài khoản. Vui lòng kiểm tra lại thông tin");
 			}
 		} catch (Exception e) {
 			result.put("success", false);
-			result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+			result.put("msg", "Xảy ra lỗi khi kích hoạt tài khoản. Vui lòng kiểm tra lại thông tin");
 			result.put("err", e.getMessage());
 		}
 		return result;
@@ -213,13 +213,13 @@ public class LoginDaoImp implements LoginDao {
 			Object[] newObj = new Object[] { null, 1, null, jsonParams.get("user_login") };
 			if (this.jdbcTemplate.update(sqlUpdateInfo, newObj) == 0) {
 				result.put("success", false);
-				result.put("msg", "Lỗi khi kích hoạt tài khoản. vui lòng thử lại");
+				result.put("msg", "Lỗi khi kích hoạt tài khoản. Vui lòng kiểm tra lại");
 				return result;
 			}
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);
-			result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+			result.put("msg", "Lỗi khi kích hoạt tài khoản. Vui lòng kiểm tra lại");
 			result.put("err", e.getMessage());
 		}
 		return result;
@@ -254,7 +254,7 @@ public class LoginDaoImp implements LoginDao {
 					new Object[] { jsonParams.get("email").toString() });
 			if (lstAccount.size() == 0) {
 				result.put("success", false);
-				result.put("msg", "Email không tồn tại! Kiểm tra lại");
+				result.put("msg", "Email không tồn tại. Kiểm tra lại");
 				return result;
 			}
 			if (lstAccount.get(0).get("active_status").toString().equals("1")) {
@@ -267,13 +267,13 @@ public class LoginDaoImp implements LoginDao {
 			Object[] newObj = new Object[] { codeActive, lstAccount.get(0).get("user_login") };
 			this.jdbcTemplate.update(sqlUpdateInfo, newObj);
 			
-			// gửi mail active
+			// gá»­i mail active
 			String subject = "Thông báo kích hoạt tài khoản: " + lstAccount.get(0).get("user_login");
 			StringBuilder content;
 			content = new StringBuilder();
-			content.append("Click vào <a href='" + rootUrl + "#/active-account?user="
+			content.append("Click <a href='" + rootUrl + "#/active-account?user="
 					+ jsonParams.get("user_login").toString() + "&code=" + codeActive
-					+ "'> đây </a> để kích hoạt tài khoản.");
+					+ "'> Tại đây </a> để kích hoạt tài khoản.");
 			this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
 			result.put("success", true);
 		} catch (Exception e) {
