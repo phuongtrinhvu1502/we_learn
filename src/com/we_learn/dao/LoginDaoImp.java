@@ -143,6 +143,13 @@ public class LoginDaoImp implements LoginDao {
 				result.put("msg", "Tài khoản đã tồn tại. Kiểm tra lại");
 				return result;
 			}
+			String queryCheckEmailExists = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE (email = N'"
+					+ jsonParams.get("email").toString() + "'))";
+			if (this.jdbcTemplate.queryForObject(queryCheckEmailExists, Integer.class) == 1) {
+				result.put("success", false);
+				result.put("msg", "Email đã được sử dụng. Kiểm tra lại");
+				return result;
+			}
 			String password = jsonParams.get("password").toString();
 			try {
 				MessageDigest md = MessageDigest.getInstance("md5");
@@ -152,7 +159,7 @@ public class LoginDaoImp implements LoginDao {
 				jsonParams.put("password", passwordMd5);
 			} catch (NoSuchAlgorithmException e) {
 			}
-			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, create_date, "
+			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, group_id, create_date, "
 					+ "deleted, code_active, expired_active)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			String codeActive = UUID.randomUUID().toString();
 			KeyHolder holder = new GeneratedKeyHolder();
@@ -165,8 +172,10 @@ public class LoginDaoImp implements LoginDao {
 					mainUtil.setParam(ps, jsonParams.get("full_name"), "string", count++);
 					mainUtil.setParam(ps, jsonParams.get("password"), "string", count++);
 					mainUtil.setParam(ps, jsonParams.get("email"), "string", count++);
+					mainUtil.setParam(ps, 2, "int", count++);
 					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
 							count++);
+					mainUtil.setParam(ps, 0, "int", count++);
 					mainUtil.setParam(ps, codeActive, "string", count++);
 					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
 							count++);
@@ -174,13 +183,13 @@ public class LoginDaoImp implements LoginDao {
 				}
 			}, holder);
 			if (holder.getKey().intValue() > 0) {
-				// gá»­i mail active
+				// gửi mail active
 				String subject = "Thông báo kích hoạt tài khoản: " + jsonParams.get("user_login");
 				StringBuilder content;
 				content = new StringBuilder();
 				content.append("Click <a href='" + rootUrl + "#/active-account?user="
 						+ jsonParams.get("user_login").toString() + "&code=" + codeActive
-						+ "'> Tại đây </a> Để kích hoạt tài khoản.");
+						+ "'> tại đây </a> để kích hoạt tài khoản.");
 				this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
 				result.put("success", true);
 			} else {
@@ -202,12 +211,13 @@ public class LoginDaoImp implements LoginDao {
 		JSONObject jsonParams = mainUtil.stringToJson(params);
 		String sqlCheckExists;
 		try {
-			String validateInfo = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE user_login = ? AND active_code = ?)";
-			String sqlUpdateInfo = "UPDATE crm_user SET active_code = ?, active_status = ?, expired_active = ?"
+			String validateInfo = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE user_login = ? AND code_active = ?)";
+			String sqlUpdateInfo = "UPDATE crm_user SET code_active = ?, active_status = ?, expired_active = ?"
 					+ " WHERE user_login = ?";
 			if (this.jdbcTemplate.queryForObject(validateInfo,
-					new Object[] { jsonParams.get("user_login"), jsonParams.get("active_code") }, Integer.class) == 1) {
+					new Object[] { jsonParams.get("user_login"), jsonParams.get("code_active") }, Integer.class) == 0) {
 				result.put("success", false);
+				result.put("msg", "Dữ liệu không hợp lệ hoặc hết thời gian kích hoạt tài khoản");
 				return result;
 			}
 			Object[] newObj = new Object[] { null, 1, null, jsonParams.get("user_login") };
@@ -262,7 +272,7 @@ public class LoginDaoImp implements LoginDao {
 				result.put("msg", "Tài khoản sử dụng email này đã được kích hoạt. Kiểm tra lại");
 				return result;
 			}
-			String sqlUpdateInfo = "UPDATE crm_user SET active_code = ?" + " WHERE user_login = ?";
+			String sqlUpdateInfo = "UPDATE crm_user SET code_active = ?" + " WHERE user_login = ?";
 			String codeActive = UUID.randomUUID().toString();
 			Object[] newObj = new Object[] { codeActive, lstAccount.get(0).get("user_login") };
 			this.jdbcTemplate.update(sqlUpdateInfo, newObj);

@@ -66,7 +66,15 @@ public class LoginController {
 		JSONObject result = authDao.signUp(params, mainUtil.getRootWebsiteUrl(context, ""));
 		return Response.status(200).entity(result.toString()).build();
 	}
-
+	@POST
+	@Path("active-account")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response activeAccount(String params) {
+		LoginDao authDao = (LoginDaoImp) this.appContext.getBean("loginDao");
+		JSONObject result = authDao.activeAccount(params);
+		return Response.status(200).entity(result.toString()).build();
+	}
 	@POST
 	@Path("resend-active-code")
 	@Consumes(MediaType.APPLICATION_JSON)
