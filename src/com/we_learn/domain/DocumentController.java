@@ -1,5 +1,9 @@
 package com.we_learn.domain;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HeaderParam;
@@ -10,36 +14,55 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.DocumentDao;
 import com.we_learn.dao.DocumentDaoImpl;
 
 @Path("/document")
-public class DocumentController extends VerifyToken{
+public class DocumentController extends VerifyToken {
 	public DocumentController(@HeaderParam("Authorization") String token) {
 		super(token);
 		// TODO Auto-generated constructor stub
 	}
+
+	private final String DOC_PATH = File.separator + "document" + File.separator;
 	@Context
 	private ServletContext context;
 	// private WebApplicationContext appContext = null;
 	@Autowired
 	private WebApplicationContext appContext = ContextLoader.getCurrentWebApplicationContext();
+
 	@POST
 	@Path("insert")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response insert(@HeaderParam("Authorization") String token, String param) {
-		if (!this.isLogined)
-			return Response.status(200).entity(this.notFoundUser().toString()).build();
+	public Response insert(@HeaderParam("Authorization") String token,
+			@FormDataParam("attachment") FormDataBodyPart file) {
+		// if (!this.isLogined)
+		// return Response.status(200).entity(this.notFoundUser().toString()).build();
+		JSONObject result = new JSONObject();
 		DocumentDao doc = (DocumentDaoImpl) this.appContext.getBean("documentDao");
-		JSONObject result = doc.insert(param, this.userId);
+		MainUtility mainUtil = new MainUtility();
+		Map<String, Object> fileObj = new HashMap<String, Object>();
+		String fileName = mainUtil.saveFile(context, DOC_PATH, file);
+		if (fileName != null && !fileName.isEmpty()) {
+			fileObj.put("file_name", fileName);
+			fileObj.put("file_path", DOC_PATH + fileName);
+			result = doc.insert(fileObj, this.userId);
+			result.put("url_document", mainUtil.initUrlDocument(context, fileObj.get("file_path").toString()));
+		} else {
+			result.put("success", false);
+			result.put("msg", "Upload failed!");
+		}
 		return Response.status(200).entity(result.toString()).build();
 	}
-	
+
 }

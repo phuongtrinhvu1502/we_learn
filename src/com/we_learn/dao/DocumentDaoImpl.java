@@ -1,5 +1,9 @@
 package com.we_learn.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +11,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import com.we_learn.common.MainUtility;
 
@@ -23,27 +29,35 @@ public class DocumentDaoImpl implements DocumentDao {
 	}
 
 	@Override
-	public JSONObject insert(String param, String user_id) {
+	public JSONObject insert(Map<String, Object> jsonParams, String user_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String content = jsonParams.get("content").toString();
-		String qa_id = jsonParams.get("qa_id").toString();
-		String query = "INSERT INTO `wl_document`(`file_name`,`file_path`, create_date, `created_by`) VALUES (?,?,?,?)";
+		String sqlInsertDoc = "INSERT INTO `wl_document`(`file_name`,`file_path`, create_date, `created_by`) VALUES (?,?,?,?)";
 		// insert
 		try {
-			Object[] objects = new Object[] { jsonParams.get("file_name").toString(),
-					jsonParams.get("file_path").toString(), mainUtil.getDateFormat("yyyy-MM-dd HH:mm:ss", new Date()),
-					user_id };
-			int row = this.jdbcTemplate.update(query, objects);
+			GeneratedKeyHolder holder = new GeneratedKeyHolder();
+			this.jdbcTemplate.update(new PreparedStatementCreator() {
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement ps = connection.prepareStatement(sqlInsertDoc, Statement.RETURN_GENERATED_KEYS);
+					int count = 1;
+					mainUtil.setParam(ps, jsonParams.get("file_name"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("file_path"), "int", count++);
+					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
+							count++);
+					mainUtil.setParam(ps, user_id, "int", count++);
+					return ps;
+				}
+			}, holder);
+			result.put("success", true);
+			result.put("doc_id", holder.getKey().intValue());
+			result.put("msg", "Upload successfully");
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("msg", e.getMessage());
 			return result;
 		}
-		result.put("success", true);
-		result.put("msg", "Comment create success");
 		return result;
 	}
 
