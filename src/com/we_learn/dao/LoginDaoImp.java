@@ -2,16 +2,29 @@ package com.we_learn.dao;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 import javax.xml.bind.DatatypeConverter;
 
 import org.json.simple.JSONObject;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -19,12 +32,8 @@ import com.we_learn.common.MainUtility;
 
 import redis.clients.jedis.Jedis;
 
+public class LoginDaoImp implements LoginDao {
 
-
-
-
-public class LoginDaoImp implements LoginDao{
-	
 	private JdbcTemplate jdbcTemplate;
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
@@ -33,6 +42,12 @@ public class LoginDaoImp implements LoginDao{
 
 	public JdbcTemplate getJdbcTemplate() {
 		return jdbcTemplate;
+	}
+
+	private JavaMailSender mailSender;
+
+	public void setMailSender(JavaMailSender mailSender) {
+		this.mailSender = mailSender;
 	}
 
 	@Override
@@ -84,7 +99,7 @@ public class LoginDaoImp implements LoginDao{
 			// userJson.put("lst_permission", arrPermission);
 			jedis.set(token, userJson.toString());
 			jedis.close();
-		
+
 			userJson.put("username", user.get("full_name"));
 			result.put("success", true);
 			result.put("data", userJson);
@@ -110,6 +125,162 @@ public class LoginDaoImp implements LoginDao{
 		jedis.del(tokenKey);
 		result.put("success", true);
 		result.put("data", "Bye see you again!");
+		return result;
+	}
+
+	@Override
+	public JSONObject signUp(String params, String rootUrl) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(params);
+		String sqlCheckExists;
+		try {
+			String passwordMd5 = "";
+			sqlCheckExists = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE (user_login = N'"
+					+ jsonParams.get("user_login").toString() + "'))";
+			if (this.jdbcTemplate.queryForObject(sqlCheckExists, Integer.class) == 1) {
+				result.put("success", false);
+				result.put("msg", "Tài khoản đã tồn tại! Kiểm tra lại");
+				return result;
+			}
+			String password = jsonParams.get("password").toString();
+			try {
+				MessageDigest md = MessageDigest.getInstance("md5");
+				md.update(password.getBytes());
+				byte[] digest = md.digest();
+				passwordMd5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
+				jsonParams.put("password", passwordMd5);
+			} catch (NoSuchAlgorithmException e) {
+			}
+			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, create_date, "
+					+ "deleted, code_active, expired_active)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String codeActive = UUID.randomUUID().toString();
+			KeyHolder holder = new GeneratedKeyHolder();
+			this.jdbcTemplate.update(new PreparedStatementCreator() {
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement ps = connection.prepareStatement(sqlInsertUser, Statement.RETURN_GENERATED_KEYS);
+					int count = 1;
+					mainUtil.setParam(ps, jsonParams.get("user_login"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("full_name"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("password"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("email"), "string", count++);
+					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
+							count++);
+					mainUtil.setParam(ps, codeActive, "string", count++);
+					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
+							count++);
+					return ps;
+				}
+			}, holder);
+			if (holder.getKey().intValue() > 0) {
+				// gửi mail active
+				String subject = "Thông báo kích hoạt tài khoản: " + jsonParams.get("user_login");
+				StringBuilder content;
+				content = new StringBuilder();
+				content.append("Click vào <a href='" + rootUrl + "#/active-account?user="
+						+ jsonParams.get("user_login").toString() + "&code=" + codeActive
+						+ "'> đây </a> để kích hoạt tài khoản.");
+				this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
+				result.put("success", true);
+			} else {
+				result.put("success", false);
+				result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+			}
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+			result.put("err", e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public JSONObject activeAccount(String params) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(params);
+		String sqlCheckExists;
+		try {
+			String validateInfo = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE user_login = ? AND active_code = ?)";
+			String sqlUpdateInfo = "UPDATE crm_user SET active_code = ?, active_status = ?, expired_active = ?"
+					+ " WHERE user_login = ?";
+			if (this.jdbcTemplate.queryForObject(validateInfo,
+					new Object[] { jsonParams.get("user_login"), jsonParams.get("active_code") }, Integer.class) == 1) {
+				result.put("success", false);
+				return result;
+			}
+			Object[] newObj = new Object[] { null, 1, null, jsonParams.get("user_login") };
+			if (this.jdbcTemplate.update(sqlUpdateInfo, newObj) == 0) {
+				result.put("success", false);
+				result.put("msg", "Lỗi khi kích hoạt tài khoản. vui lòng thử lại");
+				return result;
+			}
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", "Xảy ra lỗi khi đăng ký tài khoản. Vui lòng kiểm tra lại thông tin");
+			result.put("err", e.getMessage());
+		}
+		return result;
+	}
+
+	private void sendMimeEmail(String toEmail, String subject, String content) {
+		Thread thread = new Thread() {
+			public void run() {
+				MimeMessagePreparator detail = new MimeMessagePreparator() {
+					public void prepare(MimeMessage mimeMessageObj) throws MessagingException {
+						MimeMessageHelper messageObj = new MimeMessageHelper(mimeMessageObj, true, "UTF-8");
+						messageObj.setTo(toEmail);
+						messageObj.setSubject(subject);
+						messageObj.setText(content, true);
+					}
+				};
+				mailSender.send(detail);
+			}
+		};
+		thread.start();
+	}
+
+	@Override
+	public JSONObject resendActiveCode(String params, String rootUrl) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(params);
+		String sqlCheckExists;
+		try {
+			String queryUserInfo = "SELECT user_login, full_name, active_status FROM crm_user WHERE email = ?";
+			List<Map<String, Object>> lstAccount = this.jdbcTemplate.queryForList(queryUserInfo,
+					new Object[] { jsonParams.get("email").toString() });
+			if (lstAccount.size() == 0) {
+				result.put("success", false);
+				result.put("msg", "Email không tồn tại! Kiểm tra lại");
+				return result;
+			}
+			if (lstAccount.get(0).get("active_status").toString().equals("1")) {
+				result.put("success", false);
+				result.put("msg", "Tài khoản sử dụng email này đã được kích hoạt. Kiểm tra lại");
+				return result;
+			}
+			String sqlUpdateInfo = "UPDATE crm_user SET active_code = ?" + " WHERE user_login = ?";
+			String codeActive = UUID.randomUUID().toString();
+			Object[] newObj = new Object[] { codeActive, lstAccount.get(0).get("user_login") };
+			this.jdbcTemplate.update(sqlUpdateInfo, newObj);
+			
+			// gửi mail active
+			String subject = "Thông báo kích hoạt tài khoản: " + lstAccount.get(0).get("user_login");
+			StringBuilder content;
+			content = new StringBuilder();
+			content.append("Click vào <a href='" + rootUrl + "#/active-account?user="
+					+ jsonParams.get("user_login").toString() + "&code=" + codeActive
+					+ "'> đây </a> để kích hoạt tài khoản.");
+			this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", "Xảy ra lỗi. Vui lòng kiểm tra lại thông tin");
+			result.put("err", e.getMessage());
+		}
 		return result;
 	}
 }

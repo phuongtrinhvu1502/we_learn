@@ -49,6 +49,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	</bean>
 	<bean id="loginDao" class="com.we_learn.dao.LoginDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
+		<property name="mailSender" ref="mailSender" />
 	</bean>
 	<bean id="qaDao" class="com.we_learn.dao.QADaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
