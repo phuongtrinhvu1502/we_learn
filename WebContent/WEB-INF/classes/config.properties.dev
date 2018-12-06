@@ -2,7 +2,7 @@
 jdbc.driverClassName=com.mysql.jdbc.Driver
 jdbc.url=jdbc:mysql://127.0.0.1:3306/crm_dev?useUnicode=yes&autoReconnect=true&maxReconnects=3&failOverReadOnly=false&characterEncoding=UTF-8
 jdbc.username=root
-jdbc.password=Thanhminh87!
+jdbc.password=
 
 #config upload path
 uploadPath=/home/datacenter/bki/
