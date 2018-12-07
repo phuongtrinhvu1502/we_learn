@@ -81,9 +81,18 @@ public class TestDaoImp implements TestDao{
 //		MainUtility mainUtil = new MainUtility();
 //		JSONObject jsonParams = mainUtil.stringToJson(param);
 //		String test_id = jsonParams.get("test_id").toString();
-//		String query = "SELECT `test_id`, `test_name`, `test_type`, `created_date`, `created_by` FROM `test` WHERE `test_id` = ? AND `deleted` = 0";
+//		String queryForTest = "SELECT `test_id`, `test_name`, `test_type` FROM `test` WHERE `test_id` = ?";
+//		String queryForQuestion = "SELECT `tq_id`, `tq_content` FROM `test_question` WHERE `test_id` = ? AND deleted = 0";
+//		String queryForAnwser = "SELECT `ta_id`, `ta_content` FROM `test_answer` WHERE `tq_id` = ? AND deleted = 0";
 //		try {
-//			List<Map<String, Object>> l = this.jdbcTemplate.queryForList(query);
+//			Map<String, Object> test = this.jdbcTemplate.queryForMap(queryForTest, new Object[] {test_id});
+//			List<Map<String, Object>> lstQuestion = this.jdbcTemplate.queryForList(queryForQuestion, new Object[] {test_id});
+//			for (Map<String, Object> question : lstQuestion) {
+//				String tq_id = question.get("tq_id").toString();
+//				List<Map<String, Object>> lstAnwser = this.jdbcTemplate.queryForList(queryForAnwser, new Object[] {tq_id});
+//				question.put("lst_anwser", lstAnwser);
+//			}
+//			test.put("results", value)
 //			JSONObject results = new JSONObject();
 //			results.put("results", listQA);
 //			results.put("total", totalRow);

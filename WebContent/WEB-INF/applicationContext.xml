@@ -75,4 +75,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="articleTopicContentDao" class="com.we_learn.dao.ArticleTopicContentDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	<bean id="userAnswerDao" class="com.we_learn.dao.UserAnswerDaoImp">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 </beans>
