@@ -81,4 +81,7 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="userAnswerDao" class="com.we_learn.dao.UserAnswerDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
+	<bean id="userDao" class="com.we_learn.dao.UserDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 </beans>
