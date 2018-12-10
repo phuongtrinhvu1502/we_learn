@@ -49,8 +49,9 @@ public class UserAnswerDaoImp implements UserAnswerDao{
 			
 			//insert user result
 			String queryForInsertUserResult = "INSERT INTO `user_result`(`test_id`, `result`, `created_by`) VALUES (?,?,?)";
-			double testResult = correctTime/user_answer.size();
-			int row = this.jdbcTemplate.update(queryForInsertUserResult, new Object[] {test_id, String.valueOf(testResult), user_id});
+			double testResult = (double) correctTime/user_answer.size();
+			double testResultRound = (double) Math.round(testResult * 100) / 100;
+			int row = this.jdbcTemplate.update(queryForInsertUserResult, new Object[] {test_id, String.valueOf(testResultRound), user_id});
 			//insert user_answer
 			String sqlForInsertUserAnswer = "INSERT INTO `user_answer`(`test_id`, `tq_id`, `us_choice`, `created_by`) VALUES (?,?,?,?)";
 			this.jdbcTemplate.batchUpdate(sqlForInsertUserAnswer, new BatchPreparedStatementSetter() {
