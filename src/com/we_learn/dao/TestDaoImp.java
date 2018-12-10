@@ -43,7 +43,6 @@ public class TestDaoImp implements TestDao{
 			return result;
 		}
 		result.put("success", true);
-		result.put("msg", "Test create success");
 		return result;
 	}
 
@@ -70,17 +69,14 @@ public class TestDaoImp implements TestDao{
 			return result;
 		}
 		result.put("success", true);
-		result.put("msg", "Test update success");
 		return result;
 	}
 
 	@Override
-	public JSONObject getById(String param) {
+	public JSONObject getById(String test_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String test_id = jsonParams.get("test_id").toString();
 //		String queryForTest = "SELECT `test_id`, `test_name`, `test_type` FROM `test` WHERE `test_id` = ?";
 		String queryForQuestion = "SELECT `tq_id`, `tq_content` FROM `test_question` WHERE `test_id` = ? AND deleted = 0";
 		String queryForAnwser = "SELECT `ta_id`, `ta_content` FROM `test_answer` WHERE `tq_id` = ? AND deleted = 0";
@@ -101,7 +97,7 @@ public class TestDaoImp implements TestDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Lấy danh sách bài viết thất bại");
+			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
 		}
 		return result;
 	}
@@ -111,12 +107,15 @@ public class TestDaoImp implements TestDao{
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		String query = "SELECT `test_id`, `test_name`, `test_type`,DATE_FORMAT(`created_date`, '%d-%m-%Y') AS `created_date`, `created_by` FROM `test` WHERE `deleted` = 0";
+		String query = "SELECT test.test_id, test_name, test_type, "
+				+ "DATE_FORMAT(test.created_date, '%d-%m-%Y') AS created_date, test.created_by, "
+				+ "(SELECT COUNT(ques.test_id) FROM test_question AS ques "
+				+ "WHERE ques.test_id = test.test_id) AS question_number "
+				+ "FROM test WHERE deleted = 0";
 		try {
 			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(query);
 			JSONObject results = new JSONObject();
-			results.put("results", listTest);
-			result.put("data", results);
+			result.put("data", listTest);
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);

@@ -5,7 +5,7 @@ import org.json.simple.JSONObject;
 public interface TestDao {
 	JSONObject insert(String param, String user_id);
 	JSONObject update(String param, String user_id);
-	JSONObject getById(String param);
+	JSONObject getById(String test_id);
 	JSONObject getAll();
 	JSONObject delete(String param, String user_id);
 	JSONObject remove(String param, String user_id);
