@@ -38,10 +38,13 @@ public class UserAnswerDaoImp implements UserAnswerDao{
 			for (int i = 0; i < user_answer.size(); i++) {
 				JSONObject answer = (JSONObject) user_answer.get(i);
 				int ta_id = this.jdbcTemplate.queryForObject(queryForCorrectAnswer, Integer.class, new Object[] {answer.get("tq_id").toString()});
-				int us_choice = (Integer) answer.get("us_choice");
-				if (us_choice == ta_id) {
-					correctTime++;
+				if (answer.get("us_choice") != null) {
+					int us_choice = Integer.parseInt(answer.get("us_choice").toString()) ;
+					if (us_choice == ta_id) {
+						correctTime++;
+					}
 				}
+				
 			}
 			
 			//insert user result
@@ -58,7 +61,12 @@ public class UserAnswerDaoImp implements UserAnswerDao{
 					JSONObject answer = (JSONObject) user_answer.get(i);
 					ps.setString(1, test_id);
 					ps.setString(2, answer.get("tq_id").toString());
-					ps.setString(3, answer.get("us_choice").toString());
+					if (answer.get("us_choice") != null) {
+						ps.setString(3, answer.get("us_choice").toString());
+					} else {
+						ps.setNull(3, java.sql.Types.NULL);
+					}
+					
 					ps.setString(4, user_id);
 				}
 				
@@ -73,6 +81,7 @@ public class UserAnswerDaoImp implements UserAnswerDao{
 			result.put("total", user_answer.size());
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 			result.put("success", false);
 			result.put("err", e.getMessage());
 			result.put("msg", "Kiểm tra kết quả thất bại");
