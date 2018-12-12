@@ -82,8 +82,8 @@ public class LoginDaoImp implements LoginDao {
 
 			Jedis jedis = new Jedis("localhost");
 			jedis.get(token);
-			String queryGetAllPermission = "SELECT p.permission_code FROM crm_group_permission AS gp "
-					+ "INNER JOIN crm_permission AS p ON gp.permission_id = p.permission_id "
+			String queryGetAllPermission = "SELECT p.permission_code FROM group_permission AS gp "
+					+ "INNER JOIN permission AS p ON gp.permission_id = p.permission_id "
 					+ "INNER JOIN crm_group ON gp.group_id = crm_group.group_id WHERE gp.deleted <> 1 AND crm_group.group_code = ?";
 			List<Map<String, Object>> lstPermission = this.jdbcTemplate.queryForList(queryGetAllPermission,
 					new Object[] { user.get("group_code").toString() });

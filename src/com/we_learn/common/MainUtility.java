@@ -65,7 +65,7 @@ public class MainUtility {
 	public boolean checkPermission(String group_code, JdbcTemplate jdbcTemplate, String permissionStr) {
 		boolean result = false;
 		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT EXISTS (SELECT 1 FROM crm_group_permission AS gp INNER JOIN crm_permission AS p "
+		sql.append("SELECT EXISTS (SELECT 1 FROM group_permission AS gp INNER JOIN permission AS p "
 				+ "ON gp.permission_id = p.permission_id INNER JOIN crm_group AS g ON gp.group_id = g.group_id "
 				+ "WHERE g.group_code = ? ");
 		sql.append("AND p.permission_code = ? )");
