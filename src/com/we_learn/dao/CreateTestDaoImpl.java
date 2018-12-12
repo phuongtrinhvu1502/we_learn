@@ -115,7 +115,7 @@ public class CreateTestDaoImpl implements CreateTestDao {
 					}, answerHolder);
 
 					if (Integer.parseInt(question.get("correct_answer").toString()) == Integer
-							.parseInt(answer.get("index").toString())) {
+							.parseInt(answer.get("rowKey").toString())) {
 						int ansHolder = answerHolder.getKey().intValue();
 						KeyHolder correctAnswerHolder = new GeneratedKeyHolder();
 						int rowCorrect = this.jdbcTemplate.update(new PreparedStatementCreator() {

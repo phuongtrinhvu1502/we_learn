@@ -19,7 +19,7 @@ import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.UserAnswerDao;
 import com.we_learn.dao.UserAnswerDaoImp;
 
-@Path("/")
+@Path("/user-answer")
 public class UserAnswerController extends VerifyToken{
 
 	public UserAnswerController(@HeaderParam("Authorization") String token) {
@@ -32,7 +32,7 @@ public class UserAnswerController extends VerifyToken{
 	@Autowired
 	private WebApplicationContext appContext = ContextLoader.getCurrentWebApplicationContext();
 	@POST
-	@Path("user-answer")
+	@Path("insert")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response userAnswer(@HeaderParam("Authorization") String token, String param) {

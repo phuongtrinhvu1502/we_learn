@@ -144,7 +144,7 @@ public class QADaoImpl implements QADao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(qa);
-		String query = "DELETE FROM question_answer AS qa WHERE qa.qa_id IN ("
+		String query = "DELETE FROM question_answer WHERE qa_id IN ("
 				+ jsonParams.get("qa_id") + ")";
 		try {
 			int row = this.jdbcTemplate.update(query);

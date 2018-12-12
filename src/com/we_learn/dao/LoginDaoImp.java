@@ -95,6 +95,7 @@ public class LoginDaoImp implements LoginDao {
 			JSONObject userJson = new JSONObject();
 			userJson.put("id", user.get("user_id"));
 			userJson.put("username", user.get("user_login"));
+			userJson.put("user_login", user.get("user_login"));
 			userJson.put("group_code", user.get("group_code"));
 			// userJson.put("lst_permission", arrPermission);
 			jedis.set(token, userJson.toString());
@@ -282,7 +283,7 @@ public class LoginDaoImp implements LoginDao {
 			StringBuilder content;
 			content = new StringBuilder();
 			content.append("Click <a href='" + rootUrl + "#/active-account?user="
-					+ jsonParams.get("user_login").toString() + "&code=" + codeActive
+					+ lstAccount.get(0).get("user_login") + "&code=" + codeActive
 					+ "'> Tại đây </a> để kích hoạt tài khoản.");
 			this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
 			result.put("success", true);

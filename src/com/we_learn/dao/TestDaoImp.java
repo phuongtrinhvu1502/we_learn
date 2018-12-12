@@ -43,7 +43,6 @@ public class TestDaoImp implements TestDao{
 			return result;
 		}
 		result.put("success", true);
-		result.put("msg", "Test create success");
 		return result;
 	}
 
@@ -70,17 +69,14 @@ public class TestDaoImp implements TestDao{
 			return result;
 		}
 		result.put("success", true);
-		result.put("msg", "Test update success");
 		return result;
 	}
 
 	@Override
-	public JSONObject getById(String param) {
+	public JSONObject getById(String test_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String test_id = jsonParams.get("test_id").toString();
 //		String queryForTest = "SELECT `test_id`, `test_name`, `test_type` FROM `test` WHERE `test_id` = ?";
 		String queryForQuestion = "SELECT `tq_id`, `tq_content` FROM `test_question` WHERE `test_id` = ? AND deleted = 0";
 		String queryForAnwser = "SELECT `ta_id`, `ta_content` FROM `test_answer` WHERE `tq_id` = ? AND deleted = 0";
@@ -101,22 +97,25 @@ public class TestDaoImp implements TestDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Lấy danh sách bài viết thất bại");
+			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
 		}
 		return result;
 	}
 
 	@Override
-	public JSONObject getAll() {
+	public JSONObject getAll(String user_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
-		String query = "SELECT `test_id`, `test_name`, `test_type`,DATE_FORMAT(`created_date`, '%d-%m-%Y') AS `created_date`, `created_by` FROM `test` WHERE `deleted` = 0";
+		String query = "SELECT test.test_id, test.test_name, test.test_type, DATE_FORMAT(test.created_date, '%d-%m-%Y') AS created_date, "
+				+ "test.created_by, (SELECT COUNT(ques.test_id) "
+				+ "FROM test_question AS ques WHERE ques.test_id = test.test_id) AS question_number, "
+				+ "IF(us.result IS NULL,0, us.result) AS last_point, IF(us.result IS NULL,0, 1) AS status "
+				+ "FROM test LEFT JOIN user_result us ON (us.test_id = test.test_id AND us.created_by = ?) WHERE test.deleted = 0";
 		try {
-			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(query);
+			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(query, new Object[] {user_id});
 			JSONObject results = new JSONObject();
-			results.put("results", listTest);
-			result.put("data", results);
+			result.put("data", listTest);
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);
@@ -136,6 +135,31 @@ public class TestDaoImp implements TestDao{
 	public JSONObject remove(String param, String user_id) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public JSONObject getCorrectAnswerById(String param) {
+		// TODO Auto-generated method stub
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(param);
+		String test_id = jsonParams.get("test_id").toString();
+		String query = "SELECT tq.tq_id, ta.ta_content AS correct_answer FROM `test` "
+				+ "LEFT JOIN test_question tq ON (tq.test_id = test.test_id) "
+				+ "LEFT JOIN correct_answer ca ON (ca.tq_id = tq.tq_id) "
+				+ "LEFT JOIN test_answer ta ON (ca.ta_id = ta.ta_id) "
+				+ "WHERE test.test_id = ?";
+		try {
+			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(query, new Object[] {test_id});
+			JSONObject results = new JSONObject();
+			result.put("data", listTest);
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("err", e.getMessage());
+			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
+		}
+		return result;
 	}
 
 	
