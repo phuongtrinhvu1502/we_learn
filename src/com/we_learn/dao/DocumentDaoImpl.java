@@ -62,33 +62,54 @@ public class DocumentDaoImpl implements DocumentDao {
 	}
 
 	@Override
-	public JSONObject getAllDocument(String param) {
-		// TODO Auto-generated method stub
+	public JSONObject getDocByPage(String param, String user_id, String group_code, String rootUrl) {
 		JSONObject data = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		String qa_id = jsonParams.get("qa_id").toString();
-		StringBuilder queryForComment = new StringBuilder();
-		queryForComment
-				.append("SELECT t1.`qa_comment_id` AS `comment_id`, t1.`qa_comment_content` AS `comment_content`,"
-						+ "IF(t1.`created_date` IS NULL,null, DATE_FORMAT(t1.`created_date`, '%d-%m-%Y %H:%i:%s')) AS `created_date`, "
-						+ "t2.`user_id`, t2.`user_login` FROM `qa_comment` t1 LEFT JOIN `crm_user` t2 ON t2.`user_id` = t1.`created_by` "
-						+ "WHERE `qa_id` = ? AND t2.`deleted` <> 1 ORDER BY t1.`created_date` DESC");
-		String queryForTotal = "SELECT COUNT(1) FROM `qa_comment` WHERE `qa_id` = ?";
-		mainUtil.getLimitOffset(queryForComment, jsonParams);
+		StringBuilder builder = new StringBuilder();
+		StringBuilder builderGetTotal = new StringBuilder();
+		builder.append("SELECT doc_id, file_name, file_path, CONCAT('" + rootUrl
+				+ "', file_path) AS url FROM wl_document WHERE 1 = 1");
+		builderGetTotal.append("SELECT COUNT(1) FROM wl_document WHERE 1 = 1");
+		if (jsonParams.get("file_name") != null && !jsonParams.get("file_name").toString().isEmpty()) {
+			builder.append(" AND file_name LIKE '%" + jsonParams.get("file_name") + "%'");
+			builderGetTotal.append(" AND file_name LIKE '%" + jsonParams.get("file_name") + "%'");
+		}
+		// sortby
+		if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
+			switch (jsonParams.get("sortField").toString()) {
+			case "file_name":
+				builder.append(" ORDER BY file_name");
+				break;
+			case "create_date":
+				builder.append(" ORDER BY create_date");
+				break;
+			default:
+				builder.append(" ORDER BY create_date");
+				break;
+			}
+			if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
+				builder.append(" ASC");
+			} else {
+				builder.append(" DESC");
+			}
+		} else {
+			builder.append(" ORDER BY create_date DESC");
+		}
+
+		mainUtil.getLimitOffset(builder, jsonParams);
 		try {
-			int totalRow = this.jdbcTemplate.queryForObject(queryForTotal, Integer.class, new Object[] { qa_id });
-			List<Map<String, Object>> listComment = this.jdbcTemplate.queryForList(queryForComment.toString(),
-					new Object[] { qa_id });
+			int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
+			List<Map<String, Object>> lstFile = this.jdbcTemplate.queryForList(builder.toString());
 			JSONObject results = new JSONObject();
-			results.put("results", listComment);
+			results.put("results", lstFile);
 			results.put("total", totalRow);
 			data.put("data", results);
 			data.put("success", true);
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh sách comment thất bại");
+			data.put("msg", "Lấy danh sách file thất bại.");
 		}
 		return data;
 	}
