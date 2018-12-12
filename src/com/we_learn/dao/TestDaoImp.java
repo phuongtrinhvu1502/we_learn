@@ -144,9 +144,11 @@ public class TestDaoImp implements TestDao{
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
 		String test_id = jsonParams.get("test_id").toString();
-		String query = "SELECT tq.tq_id, ca.ta_id AS corect_answer FROM `test` "
+		String query = "SELECT tq.tq_id, ta.ta_content AS correct_answer FROM `test` "
 				+ "LEFT JOIN test_question tq ON (tq.test_id = test.test_id) "
-				+ "LEFT JOIN correct_answer ca ON (ca.tq_id = tq.tq_id) WHERE test.test_id = ?";
+				+ "LEFT JOIN correct_answer ca ON (ca.tq_id = tq.tq_id) "
+				+ "LEFT JOIN test_answer ta ON (ca.ta_id = ta.ta_id) "
+				+ "WHERE test.test_id = ?";
 		try {
 			List<Map<String, Object>> listTest = this.jdbcTemplate.queryForList(query, new Object[] {test_id});
 			JSONObject results = new JSONObject();
