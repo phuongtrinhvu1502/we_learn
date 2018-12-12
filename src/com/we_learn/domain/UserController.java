@@ -62,4 +62,19 @@ public class UserController extends VerifyToken{
 		JSONObject result = userDao.activePremium(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
+	
+	@PUT
+	@Path("update-password")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateUserPassword(@HeaderParam("Authorization") String token, String user) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		// this.appContext =
+		// WebApplicationContextUtils.getWebApplicationContext(context);
+		UserDao userDao = (UserDaoImpl) this.appContext.getBean("userDao");
+
+		JSONObject result = userDao.updateUserPassword(user, Integer.parseInt(this.userId));
+		return Response.status(200).entity(result.toString()).build();
+	}
 }

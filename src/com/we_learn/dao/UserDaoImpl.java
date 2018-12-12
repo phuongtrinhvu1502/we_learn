@@ -1,5 +1,6 @@
 package com.we_learn.dao;
 
+import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -8,10 +9,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.log4j.Logger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -121,6 +125,58 @@ public class UserDaoImpl implements UserDao {
 			result.put("err", e.getMessage());
 		}
 
+		return result;
+	}
+	
+	@Override
+	public JSONObject updateUserPassword(String user, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(user);
+
+		try {
+			String oldPassword = jsonParams.get("old_password").toString();
+			MessageDigest md = MessageDigest.getInstance("md5");
+			md.update(oldPassword.getBytes());
+			byte[] digest = md.digest();
+			String oldPasswordMd5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
+			String sqlCheckPassword;
+			sqlCheckPassword = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE password = '" + oldPasswordMd5
+					+ "' AND user_id = " + user_id + ")";
+			if (this.jdbcTemplate.queryForObject(sqlCheckPassword, Integer.class) != 1) {
+				result.put("success", false);
+				result.put("msg", "Sai mật khẩu cũ! Kiểm tra lại");
+				return result;
+			}
+			if (jsonParams.get("new_password") == null || "".equals(jsonParams.get("new_password").toString())) {
+				result.put("success", false);
+				result.put("msg", "Mật khẩu mới không được để trống");
+				return result;
+			}
+			String newPassword = jsonParams.get("new_password").toString();
+			md.update(newPassword.getBytes());
+			digest = md.digest();
+			String newPasswordMd5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
+			jsonParams.put("new_password", newPasswordMd5);
+			String sql = "UPDATE crm_user SET password = ?, modify_date = ?, modify_by = ? WHERE crm_user.user_id = ?";
+
+			this.jdbcTemplate.execute(sql, new PreparedStatementCallback<Boolean>() {
+				@Override
+				public Boolean doInPreparedStatement(PreparedStatement ps) throws SQLException {
+					ps.setString(1, jsonParams.get("new_password").toString());
+					ps.setString(2, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"));
+					ps.setInt(3, user_id);
+					ps.setInt(4, user_id);
+					return ps.execute();
+				}
+			});
+			result.put("success", true);
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+			e.printStackTrace();
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+		}
 		return result;
 	}
 }

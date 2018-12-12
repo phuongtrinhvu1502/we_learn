@@ -95,6 +95,7 @@ public class LoginDaoImp implements LoginDao {
 			JSONObject userJson = new JSONObject();
 			userJson.put("id", user.get("user_id"));
 			userJson.put("username", user.get("user_login"));
+			userJson.put("user_login", user.get("user_login"));
 			userJson.put("group_code", user.get("group_code"));
 			// userJson.put("lst_permission", arrPermission);
 			jedis.set(token, userJson.toString());
