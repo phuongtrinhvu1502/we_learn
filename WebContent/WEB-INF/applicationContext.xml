@@ -75,11 +75,10 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="articleTopicContentDao" class="com.we_learn.dao.ArticleTopicContentDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
-<<<<<<< HEAD
 	<bean id="documentDao" class="com.we_learn.dao.DocumentDaoImpl">
-=======
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+	</bean>
 	<bean id="userAnswerDao" class="com.we_learn.dao.UserAnswerDaoImp">
->>>>>>> c32e519063feefdd300dbcd2f7bb0b27dd824344
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 	</bean>
 </beans>

@@ -1,8 +1,12 @@
 package com.we_learn.domain;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -23,6 +27,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
+import com.we_learn.dao.ArticleTopicContentDao;
+import com.we_learn.dao.ArticleTopicContentDaoImp;
 import com.we_learn.dao.DocumentDao;
 import com.we_learn.dao.DocumentDaoImpl;
 
@@ -45,26 +51,48 @@ public class DocumentController extends VerifyToken {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response insert(@HeaderParam("Authorization") String token,
-			@FormDataParam("attachment") FormDataBodyPart file) {
+			@FormDataParam("attachment") List<FormDataBodyPart> lstFile) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		JSONObject result = new JSONObject();
 		DocumentDao doc = (DocumentDaoImpl) this.appContext.getBean("documentDao");
 		MainUtility mainUtil = new MainUtility();
 		Map<String, Object> fileObj = new HashMap<String, Object>();
-		String fileName = mainUtil.saveFile(context, DOC_PATH, file);
-		if (fileName != null && !fileName.isEmpty()) {
-			fileObj.put("file_name", fileName);
-			fileObj.put("file_path", DOC_PATH + fileName);
-			result = doc.insert(fileObj, this.userId);
-			if (Boolean.parseBoolean(result.get("success").toString())) {
-				result.put("url_document", mainUtil.initUrlDocument(context, fileObj.get("file_path").toString()));
+		for (FormDataBodyPart file : lstFile) {
+			String fileName = mainUtil.saveFile(context, DOC_PATH, file);
+			if (fileName != null && !fileName.isEmpty()) {
+				fileObj.put("file_name", fileName);
+				fileObj.put("file_path", DOC_PATH + fileName);
+				result = doc.insert(fileObj, this.userId);
+				// if (Boolean.parseBoolean(result.get("success").toString())) {
+				// result.put("url_document", mainUtil.initUrlDocument(context,
+				// fileObj.get("file_path").toString()));
+				// }
+			} else {
+				result.put("success", false);
+				result.put("msg", "Upload failed!");
 			}
-		} else {
-			result.put("success", false);
-			result.put("msg", "Upload failed!");
 		}
+		result.put("success", true);
 		return Response.status(200).entity(result.toString()).build();
 	}
 
+	@POST
+	@Path("get-doc-by-page")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getDocumentByPage(@HeaderParam("Authorization") String token, String param) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		DocumentDao doc = (DocumentDaoImpl) this.appContext.getBean("documentDao");
+		JSONObject result = null;
+		Properties prop = new Properties();
+		try {
+			prop.load(new FileInputStream(context.getRealPath("/WEB-INF/classes/config.properties")));
+			result = doc.getDocByPage(param, this.userId, this.groupCode, prop.getProperty("uploadUrl"));
+		} catch (IOException ie) {
+			return Response.status(200).entity(ie.getMessage()).build();
+		}
+		return Response.status(200).entity(result.toString()).build();
+	}
 }
