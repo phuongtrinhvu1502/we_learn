@@ -63,9 +63,10 @@ public class TestController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getListTest(@HeaderParam("Authorization") String token, String param) {
-		
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TestDao testDao = (TestDaoImp) this.appContext.getBean("testDao");
-		JSONObject result = testDao.getAll();
+		JSONObject result = testDao.getAll(this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 	
@@ -78,6 +79,17 @@ public class TestController extends VerifyToken{
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		TestDao testDao = (TestDaoImp) this.appContext.getBean("testDao");
 		JSONObject result = testDao.getById(request.getParameter("test_id"));
+		return Response.status(200).entity(result.toString()).build();
+	}
+	@POST
+	@Path("get-correct-anwser-by-id")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCorrectAnswerById(@HeaderParam("Authorization") String token, String param) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		TestDao testDao = (TestDaoImp) this.appContext.getBean("testDao");
+		JSONObject result = testDao.getCorrectAnswerById(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }
