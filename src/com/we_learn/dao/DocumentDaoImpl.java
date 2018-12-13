@@ -69,8 +69,8 @@ public class DocumentDaoImpl implements DocumentDao {
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 		builder.append("SELECT doc_id, file_name, file_path, CONCAT('" + rootUrl
-				+ "', file_path) AS url FROM wl_document WHERE 1 = 1");
-		builderGetTotal.append("SELECT COUNT(1) FROM wl_document WHERE 1 = 1");
+				+ "', file_path) AS url FROM document WHERE 1 = 1");
+		builderGetTotal.append("SELECT COUNT(1) FROM document WHERE 1 = 1");
 		if (jsonParams.get("file_name") != null && !jsonParams.get("file_name").toString().isEmpty()) {
 			builder.append(" AND file_name LIKE '%" + jsonParams.get("file_name") + "%'");
 			builderGetTotal.append(" AND file_name LIKE '%" + jsonParams.get("file_name") + "%'");
@@ -109,7 +109,7 @@ public class DocumentDaoImpl implements DocumentDao {
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh sách file thất bại.");
+			data.put("msg", "Lấy danh sách file thất bại");
 		}
 		return data;
 	}
