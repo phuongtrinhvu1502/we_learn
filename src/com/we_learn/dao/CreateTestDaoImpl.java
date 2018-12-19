@@ -26,10 +26,15 @@ import com.we_learn.common.MainUtility;
 
 public class CreateTestDaoImpl implements CreateTestDao {
 	private JdbcTemplate jdbcTemplate;
+	private PlatformTransactionManager transactionManager;
 	private Logger logger = Logger.getLogger(CreateTestDaoImpl.class);
 
 	public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
+	}
+	
+	public void setTransactionManager(PlatformTransactionManager txManager) {
+		this.transactionManager = txManager;
 	}
 
 	public JdbcTemplate getJdbcTemplate() {
@@ -42,8 +47,8 @@ public class CreateTestDaoImpl implements CreateTestDao {
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(param);
-		// TransactionDefinition txDef = new DefaultTransactionDefinition();
-		// TransactionStatus txStatus = this.transactionManager.getTransaction(txDef);
+		 TransactionDefinition txDef = new DefaultTransactionDefinition();
+		 TransactionStatus txStatus = this.transactionManager.getTransaction(txDef);
 		// insert
 
 		String sqlInsertTest = "INSERT INTO test (test_name, test_type, created_date, created_by, deleted)"
@@ -91,6 +96,13 @@ public class CreateTestDaoImpl implements CreateTestDao {
 						return statement;
 					}
 				}, quesHolder);
+				
+				if (rowQues == 0) {
+					this.transactionManager.rollback(txStatus);
+					result.put("success", false);
+					result.put("msg", "Lỗi khi tạo đề thi");
+					return result;
+				}
 
 				int questionHolder = quesHolder.getKey().intValue();
 				JSONArray lst_answer = (JSONArray) question.get("lst_answer");
@@ -113,6 +125,13 @@ public class CreateTestDaoImpl implements CreateTestDao {
 							return statement;
 						}
 					}, answerHolder);
+					
+					if (rowAns == 0) {
+						this.transactionManager.rollback(txStatus);
+						result.put("success", false);
+						result.put("msg", "Lỗi khi tạo đề thi");
+						return result;
+					}
 
 					if (Integer.parseInt(question.get("correct_answer").toString()) == Integer
 							.parseInt(answer.get("rowKey").toString())) {
@@ -134,16 +153,24 @@ public class CreateTestDaoImpl implements CreateTestDao {
 								return ps;
 							}
 						}, correctAnswerHolder);
+						if (rowCorrect == 0) {
+							this.transactionManager.rollback(txStatus);
+							result.put("success", false);
+							result.put("msg", "Lỗi khi tạo đề thi");
+							return result;
+						}
 					}
 				}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
+			this.transactionManager.rollback(txStatus);
 			e.printStackTrace();
 			result.put("success", false);
 			result.put("msg", e.getMessage());
 			return result;
 		}
+		this.transactionManager.commit(txStatus);
 		result.put("success", true);
 		return result;
 	}
