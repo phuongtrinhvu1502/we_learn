@@ -1,4 +1,4 @@
-package request;
+package com.we_learn.domain;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;

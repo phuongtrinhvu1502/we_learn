@@ -50,7 +50,9 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		String queryForWrittingTest = "SELECT `wt_title`, `wt_content` FROM `writing_test` WHERE `wt_id` = ?";
-		String queryForTopic = "SELECT wtt.wtt_content FROM `writing_test` wt LEFT JOIN writing_test_topic wtt ON (wt.wt_id = wtt.wt_id) WHERE wt.wt_id = ?";
+		String queryForTopic = "SELECT wtt.wtt_id, wtt.wtt_content, user.full_name FROM `writing_test` AS wt "
+				+ "LEFT JOIN writing_test_topic AS wtt ON (wt.wt_id = wtt.wt_id) "
+				+ "LEFT JOIN crm_user AS user ON (wtt.created_by = user.user_id) WHERE wt.wt_id = ?";
 		try {
 			Map<String, Object> test = this.jdbcTemplate.queryForMap(queryForWrittingTest, new Object[] {wt_id});
 			List<Map<String, Object>> lstTopic = this.jdbcTemplate.queryForList(queryForTopic, new Object[] {wt_id});
@@ -125,5 +127,25 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 			data.put("msg", "Lấy danh mục thất bại");
 		}
 		return data;
+	}
+
+	@Override
+	public JSONObject getAllByUserId(String wt_id, String user_id) {
+		// TODO Auto-generated method stub
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		String query = "SELECT wt.`wt_id`, wt.`wt_title`, wt.`wt_content`,"
+				+ "IF ((SELECT COUNT(wtt.wt_id) FROM writing_test_topic wtt WHERE wtt.wt_id = wt.wt_id "
+				+ "AND wtt.created_by = ? AND wtt.deleted = 0) > 0, 1,0) AS status FROM `writing_test` wt WHERE wt.`deleted` = 0";
+		try {
+			List<Map<String, Object>> lstWt = this.jdbcTemplate.queryForList(query, new Object[] {wt_id});
+			result.put("data", lstWt);
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("err", e.getMessage());
+			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
+		}
+		return result;
 	}
 }

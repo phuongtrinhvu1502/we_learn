@@ -6,4 +6,5 @@ public interface WrittingTestDao {
 	JSONObject insert(String param, String user_id);
 	JSONObject getById(String wt_id);
 	JSONObject getByPage(String param);
+	JSONObject getAllByUserId(String param, String user_id);
 }

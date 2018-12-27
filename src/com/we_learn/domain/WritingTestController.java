@@ -52,7 +52,7 @@ public class WritingTestController extends VerifyToken{
 	@Path("get-wt-by-page")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getQAByPage(@HeaderParam("Authorization") String token, String param) {
+	public Response getWtByPage(@HeaderParam("Authorization") String token, String param) {
 //		if (!this.isLogined)
 //			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
@@ -64,9 +64,20 @@ public class WritingTestController extends VerifyToken{
 	@Path("get-wt-by-id")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response viewQAById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+	public Response getWtById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
 		JSONObject result = writtingTestDao.getById(request.getParameter("wt_id"));
+		return Response.status(200).entity(result.toString()).build();
+	}
+	@GET
+	@Path("get-wt-by-user-id")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getWtByUserId(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
+		JSONObject result = writtingTestDao.getAllByUserId(request.getParameter("wt_id"), this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }
