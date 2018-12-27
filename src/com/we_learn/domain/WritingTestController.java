@@ -20,9 +20,8 @@ import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.VerifyToken;
-import com.we_learn.dao.QADao;
-import com.we_learn.dao.QADaoImpl;
 import com.we_learn.dao.WrittingTestDao;
+import com.we_learn.dao.WrittingTestDaoImp;
 
 @Path("/writing-test")
 public class WritingTestController extends VerifyToken{
@@ -42,7 +41,7 @@ public class WritingTestController extends VerifyToken{
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
+		WrittingTestDao writtingTestDao = (WrittingTestDaoImp) this.appContext.getBean("writingTestDao");
 		JSONObject result = writtingTestDao.insert(param, this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -55,7 +54,7 @@ public class WritingTestController extends VerifyToken{
 	public Response getWtByPage(@HeaderParam("Authorization") String token, String param) {
 //		if (!this.isLogined)
 //			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
+		WrittingTestDao writtingTestDao = (WrittingTestDaoImp) this.appContext.getBean("writingTestDao");
 		JSONObject result = writtingTestDao.getByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -65,7 +64,7 @@ public class WritingTestController extends VerifyToken{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getWtById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
-		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
+		WrittingTestDao writtingTestDao = (WrittingTestDaoImp) this.appContext.getBean("writingTestDao");
 		JSONObject result = writtingTestDao.getById(request.getParameter("wt_id"));
 		return Response.status(200).entity(result.toString()).build();
 	}
@@ -73,11 +72,11 @@ public class WritingTestController extends VerifyToken{
 	@Path("get-wt-by-user-id")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getWtByUserId(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+	public Response getAllByUserId(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		WrittingTestDao writtingTestDao = (WrittingTestDao) this.appContext.getBean("writingTestDao");
-		JSONObject result = writtingTestDao.getAllByUserId(request.getParameter("wt_id"), this.userId);
+		WrittingTestDao writtingTestDao = (WrittingTestDaoImp) this.appContext.getBean("writingTestDao");
+		JSONObject result = writtingTestDao.getAllByUserId(this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

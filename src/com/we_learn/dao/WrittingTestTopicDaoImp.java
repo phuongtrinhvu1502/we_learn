@@ -55,16 +55,23 @@ public class WrittingTestTopicDaoImp implements WrittingTestTopicDao{
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 
-		builder.append("SELECT wtt.`wtt_id`,wtt.`wtt_content`, wtt.`is_premium`, wtt.`created_date`, crm_user.full_name, "
+		builder.append("SELECT wtt.`wtt_id`,wtt.`wtt_content`, wtt.`is_premium`, "
+				+ "DATE_FORMAT(wtt.created_date, '%d-%m-%Y') AS created_date, crm_user.full_name, "
+				+ "writing_test.wt_title, "
 				+ "(SELECT COUNT(wtc.wtc_id) FROM writing_test_comment wtc WHERE wtc.wtt_id = wtt.wtt_id) AS comments "
-				+ "FROM `writing_test_topic` wtt LEFT JOIN crm_user ON (wtt.created_by = crm_user.user_id) WHERE 1 = 1");
+				+ "FROM `writing_test_topic` wtt "
+				+ "LEFT JOIN crm_user ON (wtt.created_by = crm_user.user_id) "
+				+ "LEFT JOIN writing_test ON (writing_test.wt_id = wtt.wt_id) "
+				+ "WHERE 1 = 1");
 		builderGetTotal.append("SELECT COUNT(1) FROM `writing_test_topic` wtt "
-				+ "LEFT JOIN crm_user ON (crm_user.user_id = wtt.created_by) WHERE 1 = 1");
+				+ "LEFT JOIN crm_user ON (crm_user.user_id = wtt.created_by) "
+				+ "LEFT JOIN writing_test ON (writing_test.wt_id = wtt.wt_id) "
+				+ "WHERE 1 = 1");
 		// filter header
 		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
 			builder.append(" AND wtt.deleted <> 1");
 			builderGetTotal.append(" AND wtt.deleted <> 1");
-		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
+		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thÃ¹ng rÃ¡c
 			builder.append(" AND wtt.deleted = 1");
 			builderGetTotal.append(" AND deleted = 1");
 		}
@@ -103,7 +110,7 @@ public class WrittingTestTopicDaoImp implements WrittingTestTopicDao{
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh mục thất bại");
+			data.put("msg", "Lấy danh sách bài làm thất bại");
 		}
 		return data;
 	}
@@ -125,7 +132,7 @@ public class WrittingTestTopicDaoImp implements WrittingTestTopicDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
+			result.put("msg", "Lấy bài làm thất bại");
 		}
 		return result;
 	}

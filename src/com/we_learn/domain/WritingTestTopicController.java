@@ -1,7 +1,9 @@
 package com.we_learn.domain;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -17,7 +19,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.WrittingTestDao;
+import com.we_learn.dao.WrittingTestDaoImp;
 import com.we_learn.dao.WrittingTestTopicDao;
+import com.we_learn.dao.WrittingTestTopicDaoImp;
 
 @Path("/writing-test-topic")
 public class WritingTestTopicController extends VerifyToken{
@@ -38,8 +42,30 @@ public class WritingTestTopicController extends VerifyToken{
 	public Response insert(@HeaderParam("Authorization") String token, String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
-		WrittingTestTopicDao writtingTestTopicDao = (WrittingTestTopicDao) this.appContext.getBean("writingTestTopicDao");
+		WrittingTestTopicDao writtingTestTopicDao = (WrittingTestTopicDaoImp) this.appContext.getBean("writingTestTopicDao");
 		JSONObject result = writtingTestTopicDao.insert(param, this.userId);
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@GET
+	@Path("get-wtt-by-id")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getWtById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
+		WrittingTestTopicDao writingTestTopicDao = (WrittingTestTopicDaoImp) this.appContext.getBean("writingTestTopicDao");
+		JSONObject result = writingTestTopicDao.getById(request.getParameter("wtt_id"));
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@POST
+	@Path("get-wtt-by-page")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getWttByPage(@HeaderParam("Authorization") String token, String param) {
+//		if (!this.isLogined)
+//			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		WrittingTestTopicDao writingTestTopicDao = (WrittingTestTopicDaoImp) this.appContext.getBean("writingTestTopicDao");
+		JSONObject result = writingTestTopicDao.getTopicByPage(param);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

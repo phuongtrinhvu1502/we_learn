@@ -62,7 +62,7 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
+			result.put("msg", "Lấy bài kiếm tra thất bại");
 		}
 		return result;
 	}
@@ -77,16 +77,18 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 
-		builder.append("SELECT `wt_id`, `wt_title`, `wt_content` FROM `writing_test` WHERE 1=1");
+		builder.append("SELECT `wt_id`, `wt_title`, `wt_content`, user.full_name, "
+				+ "IF(writing_test.created_date IS NULL,null, DATE_FORMAT(writing_test.created_date, '%d-%m-%Y')) AS created_date FROM writing_test "
+				+ "LEFT JOIN crm_user AS user ON writing_test.created_by = user.user_id WHERE 1=1 ");
 		builderGetTotal.append("SELECT COUNT(1) FROM `writing_test` "
 				+ " WHERE 1=1");
 		// filter header
 		if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
-			builder.append(" AND deleted <> 1");
-			builderGetTotal.append(" AND deleted <> 1");
-		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
-			builder.append(" AND deleted = 1");
-			builderGetTotal.append(" AND deleted = 1");
+			builder.append(" AND writing_test.deleted <> 1");
+			builderGetTotal.append(" AND writing_test.deleted <> 1");
+		} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thÃ¹ng rÃ¡c
+			builder.append(" AND writing_test.deleted = 1");
+			builderGetTotal.append(" AND writing_test.deleted = 1");
 		}
 		if (jsonParams.get("wt_title") != null && !"".equals(jsonParams.get("wt_title").toString())) {
 			builder.append(" AND wt_title LIKE N'%" + jsonParams.get("wt_title").toString() + "%'");
@@ -102,7 +104,7 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 		if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
 			switch (jsonParams.get("sortField").toString()) {
 			default:
-				builder.append(" ORDER BY created_date DESC");
+				builder.append(" ORDER BY writing_test.created_date DESC");
 				break;
 			}
 //			if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
@@ -124,13 +126,13 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 		} catch (Exception e) {
 			data.put("success", false);
 			data.put("err", e.getMessage());
-			data.put("msg", "Lấy danh mục thất bại");
+			data.put("msg", "Lấy danh sách bài kiểm tra thất bại");
 		}
 		return data;
 	}
 
 	@Override
-	public JSONObject getAllByUserId(String wt_id, String user_id) {
+	public JSONObject getAllByUserId(String user_id) {
 		// TODO Auto-generated method stub
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
@@ -138,13 +140,13 @@ public class WrittingTestDaoImp implements WrittingTestDao{
 				+ "IF ((SELECT COUNT(wtt.wt_id) FROM writing_test_topic wtt WHERE wtt.wt_id = wt.wt_id "
 				+ "AND wtt.created_by = ? AND wtt.deleted = 0) > 0, 1,0) AS status FROM `writing_test` wt WHERE wt.`deleted` = 0";
 		try {
-			List<Map<String, Object>> lstWt = this.jdbcTemplate.queryForList(query, new Object[] {wt_id});
+			List<Map<String, Object>> lstWt = this.jdbcTemplate.queryForList(query, new Object[] {user_id});
 			result.put("data", lstWt);
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Lấy danh sách bài kiểm tra thất bại");
+			result.put("msg", "Lấy danh sách bài kiếm tra thất bại");
 		}
 		return result;
 	}
