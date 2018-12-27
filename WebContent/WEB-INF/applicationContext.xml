@@ -88,4 +88,10 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="permissionDao" class="com.we_learn.dao.PermissionDaoImpl">
 		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
 	</bean>
+	<bean id="writingTestDao" class="com.we_learn.dao.WrittingTestDao">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	<bean id="writingTestTopicDao" class="com.we_learn.dao.WrittingTestTopicDao">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
 </beans>
