@@ -34,13 +34,14 @@ public class HomePageDaoImpl implements HomePageDao {
 		StringBuilder builder = new StringBuilder();
 		StringBuilder builderGetTotal = new StringBuilder();
 
-		builder.append("SELECT article.article_id, article.article_title, 'https://cdn-images-1.medium.com/max/1200/1*EPHVYygppZ2py-HQ57CSqA.jpeg' AS img_url, "
-				+ "article.deleted, user.full_name AS created_by_name, article.article_content, "
-				+ "IF(article.created_date IS NULL,null, DATE_FORMAT(article.created_date, '%d-%m-%Y')) AS created_date FROM article "
-				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id WHERE article.deleted <> 1 "
-				+ "ORDER BY article.created_date DESC");
-		builderGetTotal.append("SELECT COUNT(1) FROM article "
-				+ "LEFT JOIN crm_user AS user ON article.created_by = user.user_id WHERE article.deleted <> 1 ");
+		builder.append("SELECT atc.atc_id, atc.atc_title, 'https://cdn-images-1.medium.com/max/1200/1*EPHVYygppZ2py-HQ57CSqA.jpeg' AS img_url, "
+				+ "atc.deleted, user.full_name AS created_by_name, atc.atc_content, "
+				+ "IF(atc.created_date IS NULL,null, DATE_FORMAT(atc.created_date, '%d-%m-%Y')) AS created_date "
+				+ "FROM article_topic_content AS atc "
+				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id WHERE atc.deleted <> 1 AND atc.is_paid = 0 "
+				+ "ORDER BY atc.created_date DESC");
+		builderGetTotal.append("SELECT COUNT(1) FROM article_topic_content AS atc "
+				+ "LEFT JOIN crm_user AS user ON atc.created_by = user.user_id WHERE atc.deleted <> 1 AND atc.is_paid = 0");
 		// lấy các biến từ table (limit, offset)
 		mainUtil.getLimitOffset(builder, jsonParams);
 		try {
