@@ -1,6 +1,6 @@
 #config database
 jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://127.0.0.1:3306/crm_prod?useUnicode=yes&autoReconnect=true&maxReconnects=5&failOverReadOnly=false&characterEncoding=UTF-8
+jdbc.url=jdbc:mysql://127.0.0.1:3306/we_learn?useUnicode=yes&autoReconnect=true&maxReconnects=5&failOverReadOnly=false&characterEncoding=UTF-8
 jdbc.username=root
 jdbc.password=Thanhminh87!
 
