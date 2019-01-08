@@ -43,9 +43,13 @@
 	<filter>
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+		<!-- <init-param>
+  		<param-name>cors.allowed.origins</param-name>
+  			<param-value>*</param-value> 
+		</init-param> -->
 		<init-param>
 			<param-name>org.glassfish.jersey.spi.container.ContainerResponseFilters</param-name>
-			<param-value>com.we_learn.domain</param-value>
+			<param-value>*</param-value>
 		</init-param>
 		<init-param>
 			<param-name>cors.allowed.headers</param-name>
