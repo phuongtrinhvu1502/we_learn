@@ -68,15 +68,62 @@ public class ArticleTopicDaoImp implements ArticleTopicDao{
 	}
 
 	@Override
-	public JSONObject delete(String param, String user_id) {
-		// TODO Auto-generated method stub
-		return null;
+	public JSONObject delete(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		String query = "DELETE FROM article_topic WHERE article_topic.at_id IN ("
+				+ jsonParams.get("at_id") + ")";
+		try {
+			int row = this.jdbcTemplate.update(query);
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			// result.put("msg", "Xóa b);
+			result.put("msg", "Xóa đề tài thất bại");
+		}
+		return result;
 	}
 
 	@Override
-	public JSONObject remove(String param, String user_id) {
-		// TODO Auto-generated method stub
-		return null;
+	public JSONObject remove(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		// Sẽ phải check bên place địa điểm đã sử dụng ở bản ghi nào chưa
+		try {
+			String query = "UPDATE article_topic SET article_topic.deleted = 1, article_topic.modify_date = ?, "
+					+ "article_topic.modify_by = ? WHERE article_topic.at_id = ?";
+			int row = this.jdbcTemplate.update(query,
+					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id,
+							jsonParams.get("at_id") });
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			// result.put("msg", "Chuyển loại địa điểm vào thùng rác thất bại");
+		}
+		return result;
+	}
+
+	@Override
+	public JSONObject restore(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		String sql = "UPDATE article_topic SET article_topic.deleted = 0, "
+				+ "article_topic.modify_date = ?, article_topic.modify_by = ?"
+				+ " WHERE article_topic.at_id IN (" + jsonParams.get("at_id") + ")";
+		try {
+			this.jdbcTemplate.update(sql,
+					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id });
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			// result.put("msg", "Restore loại địa điểm thất bại");
+		}
+		return result;
 	}
 
 	@Override

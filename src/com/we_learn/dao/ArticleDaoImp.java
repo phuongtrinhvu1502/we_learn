@@ -70,16 +70,63 @@ public class ArticleDaoImp implements ArticleDao{
 	}
 
 	@Override
-	public JSONObject delete(String param, String user_id) {
-		// TODO Auto-generated method stub
-		return null;
+	public JSONObject delete(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		String query = "DELETE FROM article WHERE article.article_id IN ("
+				+ jsonParams.get("article_id") + ")";
+		try {
+			int row = this.jdbcTemplate.update(query);
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			// result.put("msg", "Xóa b);
+			result.put("msg", "Xóa danh mục thất bại");
+		}
+		return result;
 	}
 
 	@Override
-	public JSONObject remove(String param, String user_id) {
-		// TODO Auto-generated method stub
-		return null;
+	public JSONObject remove(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		// Sẽ phải check bên place địa điểm đã sử dụng ở bản ghi nào chưa
+		try {
+			String query = "UPDATE article SET article.deleted = 1, article.modify_date = ?, "
+					+ "article.modify_by = ? WHERE article.article_id = ?";
+			int row = this.jdbcTemplate.update(query,
+					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id,
+							jsonParams.get("article_id") });
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+			// result.put("msg", "Chuyển loại địa điểm vào thùng rác thất bại");
+		}
+		return result;
 	}
+
+	@Override
+	public JSONObject restore(String article, int user_id) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(article);
+		String sql = "UPDATE article SET article.deleted = 0, "
+				+ "article.modify_date = ?, article.modify_by = ?"
+				+ " WHERE article.article_id IN (" + jsonParams.get("article_id") + ")";
+		try {
+			this.jdbcTemplate.update(sql,
+					new Object[] { mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), user_id });
+			result.put("success", true);
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", e.getMessage());
+		}
+		return result;
+	}
+
 	
 
 	@Override

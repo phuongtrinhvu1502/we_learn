@@ -22,6 +22,8 @@ import org.springframework.web.context.WebApplicationContext;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.ArticleDao;
 import com.we_learn.dao.ArticleDaoImp;
+import com.we_learn.dao.ArticleTopicDao;
+import com.we_learn.dao.ArticleTopicDaoImp;
 @Path("/article")
 public class ArticleController extends VerifyToken{
 	public ArticleController(@HeaderParam("Authorization") String token) {
@@ -124,6 +126,42 @@ public class ArticleController extends VerifyToken{
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
 		JSONObject result = articleDao.getAllListArticle();
+		return Response.status(200).entity(result.toString()).build();
+	}
+	
+	@PUT
+	@Path("remove")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response remove(@HeaderParam("Authorization") String token, String article) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleDao.remove(article, Integer.parseInt(this.userId));
+		return Response.status(200).entity(result.toString()).build();
+	}
+
+	@PUT
+	@Path("restore")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response restore(@HeaderParam("Authorization") String token, String article) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleDao.restore(article, Integer.parseInt(this.userId));
+		return Response.status(200).entity(result.toString()).build();
+	}
+
+	@DELETE
+	@Path("delete")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response delete(@HeaderParam("Authorization") String token, String article) {
+		if (!this.isLogined)
+			return Response.status(200).entity(this.notFoundUser().toString()).build();
+		ArticleDao articleDao = (ArticleDaoImp) this.appContext.getBean("articleDao");
+		JSONObject result = articleDao.delete(article, Integer.parseInt(this.userId));
 		return Response.status(200).entity(result.toString()).build();
 	}
 }
