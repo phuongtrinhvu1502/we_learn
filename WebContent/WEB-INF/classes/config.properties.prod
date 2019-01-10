@@ -5,10 +5,10 @@ jdbc.username=root
 jdbc.password=Thanhminh87!
 
 #config upload path
-uploadPath=/home/datacenter/bki/
+uploadPath=/home/ducanh/public_html/we_learn_client/dist/images/
 
 #config root url upload folder
-uploadUrl=http://crm-datacenter.backyinc.com/
+uploadUrl=http://hong-ui.hacvntech.com/images/
 
 #config root url website
 websiteUrl=http://hong-ui.hacvntech.com/
