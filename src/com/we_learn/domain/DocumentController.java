@@ -73,7 +73,7 @@ public class DocumentController extends VerifyToken {
 				result.put("msg", "Upload failed!");
 			}
 		}
-		result.put("success", true);
+//		result.put("success", true);
 		return Response.status(200).entity(result.toString()).build();
 	}
 
