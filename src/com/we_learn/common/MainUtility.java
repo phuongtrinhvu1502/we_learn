@@ -244,6 +244,11 @@ public class MainUtility {
 				pathFile = Paths.get(rootPath + path + File.separator + result);
 			}
 			Files.copy(bodyPartEntity.getInputStream(), pathFile);
+			
+			File file = pathFile.toFile();
+	        file.setExecutable(true, false);
+	        file.setReadable(true, false);
+	        file.setWritable(true, false);
 		} catch (IOException ie) {
 			return null;
 		}
