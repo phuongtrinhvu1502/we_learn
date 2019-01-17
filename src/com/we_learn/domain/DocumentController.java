@@ -39,7 +39,7 @@ public class DocumentController extends VerifyToken {
 		// TODO Auto-generated constructor stub
 	}
 
-	private final String DOC_PATH = File.separator + "document" + File.separator;
+	private final String DOC_PATH = File.separator;
 	@Context
 	private ServletContext context;
 	// private WebApplicationContext appContext = null;

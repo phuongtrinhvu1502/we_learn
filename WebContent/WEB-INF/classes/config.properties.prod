@@ -8,7 +8,7 @@ jdbc.password=Thanhminh87!
 uploadPath=/home/ducanh/public_html/we_learn_client/dist/images/
 
 #config root url upload folder
-uploadUrl=http://hong-ui.hacvntech.com/images/
+uploadUrl=http://hong-ui.hacvntech.com/images
 
 #config root url website
 websiteUrl=http://hong-ui.hacvntech.com/
