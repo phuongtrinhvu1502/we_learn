@@ -50,8 +50,8 @@ public class UserAnswerDaoImp implements UserAnswerDao{
 				
 			}
 			//check insert or update
-			String queryForCheck = "SELECT 1 FROM `user_result` WHERE `test_id` = ?";
-			List<Map<String, Object>> lstCheck = this.jdbcTemplate.queryForList(queryForCheck, new Object[] {test_id});
+			String queryForCheck = "SELECT 1 FROM `user_result` WHERE `test_id` = ? AND created_by = ?";
+			List<Map<String, Object>> lstCheck = this.jdbcTemplate.queryForList(queryForCheck, new Object[] {test_id, user_id});
 			//insert or update user result and user_answer
 			double testResult = (double) correctTime/user_answer.size();
 			double testResultRound = (double) Math.round(testResult * 100) / 100;
