@@ -96,4 +96,10 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 	<bean id="writingTestTopicDao" class="com.we_learn.dao.WrittingTestTopicDaoImp">
 		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
 	</bean>
+	<bean id="courseDao" class="com.we_learn.dao.CourseDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
+	<bean id="courseCommentDao" class="com.we_learn.dao.CourseCommentDaoImpl">
+		<property name="jdbcTemplate" ref="jdbcTemplate"></property>
+	</bean>
 </beans>
