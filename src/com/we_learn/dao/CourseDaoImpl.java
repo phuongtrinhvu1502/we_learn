@@ -85,8 +85,8 @@ public class CourseDaoImpl implements CourseDao{
 			result.put("success", true);
 		} catch (Exception e) {
 			result.put("success", false);
-//			result.put("msg", "Xóa b);
-			 result.put("msg", "Xóa khóa học thất bại");
+//			result.put("msg", "XÃ³a b);
+			 result.put("msg", "XÃ³a khÃ³a há»�c tháº¥t báº¡i");
 		}
 		return result;
 	}
@@ -96,7 +96,7 @@ public class CourseDaoImpl implements CourseDao{
 		JSONObject result = new JSONObject();
 		MainUtility mainUtil = new MainUtility();
 		JSONObject jsonParams = mainUtil.stringToJson(qa);
-		// Sẽ phải check bên place địa điểm đã sử dụng ở bản ghi nào chưa
+		// Sáº½ pháº£i check bÃªn place Ä‘á»‹a Ä‘iá»ƒm Ä‘Ã£ sá»­ dá»¥ng á»Ÿ báº£n ghi nÃ o chÆ°a
 		try {
 			String query = "UPDATE course AS qa SET qa.deleted = 1, qa.modify_date = ?, "
 					+ "qa.modify_by = ? WHERE qa.course_id = ?";
@@ -126,7 +126,7 @@ public class CourseDaoImpl implements CourseDao{
 			logger.info(e.getMessage());
 			result.put("success", false);
 			result.put("msg", e.getMessage());
-			// result.put("msg", "Restore loại địa điểm thất bại");
+			// result.put("msg", "Restore loáº¡i Ä‘á»‹a Ä‘iá»ƒm tháº¥t báº¡i");
 		}
 		return result;
 	}
@@ -145,7 +145,7 @@ public class CourseDaoImpl implements CourseDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Không lấy được thông tin khóa học. Kiểm tra lại");
+			result.put("msg", "KhÃ´ng láº¥y Ä‘Æ°á»£c thÃ´ng tin khÃ³a há»�c. Kiá»ƒm tra láº¡i");
 		}
 		return result;
 	}
@@ -165,7 +165,7 @@ public class CourseDaoImpl implements CourseDao{
 		} catch (Exception e) {
 			result.put("success", false);
 			result.put("err", e.getMessage());
-			result.put("msg", "Không lấy được thông tin khóa học. Kiểm tra lại");
+			result.put("msg", "KhÃ´ng láº¥y Ä‘Æ°á»£c thÃ´ng tin khÃ³a há»�c. Kiá»ƒm tra láº¡i");
 		}
 		return result;
 	}
@@ -181,7 +181,7 @@ public class CourseDaoImpl implements CourseDao{
 				StringBuilder builderGetTotal = new StringBuilder();
 				
 				builder.append(
-						"SELECT qa.course_id, qa.course_title, (SELECT COUNT(course_id) FROM course_comment WHERE qa_comment.course_id = qa.course_id) AS comment_number, "
+						"SELECT qa.course_id, qa.course_title, (SELECT COUNT(course_id) FROM course_comment AS qa_comment WHERE qa_comment.course_id = qa.course_id) AS comment_number, "
 								+ "qa.deleted, user.full_name, "
 								+ "IF(qa.created_date IS NULL,null, DATE_FORMAT(qa.created_date, '%d-%m-%Y')) AS created_date FROM course AS qa "
 								+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id WHERE 1=1 ");
@@ -191,7 +191,7 @@ public class CourseDaoImpl implements CourseDao{
 				if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
 					builder.append(" AND qa.deleted <> 1");
 					builderGetTotal.append(" AND qa.deleted <> 1");
-				} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thùng rác
+				} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thÃ¹ng rÃ¡c
 					builder.append(" AND qa.deleted = 1");
 					builderGetTotal.append(" AND qa.deleted = 1");
 				}
@@ -208,7 +208,7 @@ public class CourseDaoImpl implements CourseDao{
 						builder.append(" ORDER BY qa.created_date DESC");
 						break;
 					}
-					// sortOrder chỉ là descend và ascend hoặc rỗng
+					// sortOrder chá»‰ lÃ  descend vÃ  ascend hoáº·c rá»—ng
 					if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
 						builder.append(" DESC");
 					}
@@ -216,7 +216,7 @@ public class CourseDaoImpl implements CourseDao{
 						builder.append(" ASC");
 					}
 				}
-				// lấy các biến từ table (limit, offset)
+				// láº¥y cÃ¡c biáº¿n tá»« table (limit, offset)
 				mainUtil.getLimitOffset(builder, jsonParams);
 				try {
 					int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
@@ -227,6 +227,7 @@ public class CourseDaoImpl implements CourseDao{
 					data.put("data", results);
 					data.put("success", true);
 				} catch (Exception e) {
+					e.printStackTrace();
 					data.put("success", false);
 					data.put("err", e.getMessage());
 					data.put("msg", "Lấy danh sách khóa học thất bại");
