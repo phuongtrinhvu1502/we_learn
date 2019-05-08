@@ -153,7 +153,7 @@ public class CourseDaoImpl implements CourseDao{
 	@Override
 	public JSONObject viewCourseById(String qa_id) {
 		JSONObject result = new JSONObject();
-		String query = "SELECT qa.course_title, qa.course_content, user.user_login "
+		String query = "SELECT qa.course_title, qa.course_content, qa.course_url, user.user_login "
 				+ "FROM course AS qa "
 				+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id "
 				+ "WHERE qa.course_id = " + qa_id;
