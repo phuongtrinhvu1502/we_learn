@@ -1,5 +1,11 @@
 package com.we_learn.domain;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.util.Properties;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -14,11 +20,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.CourseDao;
 import com.we_learn.dao.CourseDaoImpl;
@@ -38,20 +47,35 @@ public class CourseController extends VerifyToken{
 	private WebApplicationContext appContext = ContextLoader.getCurrentWebApplicationContext();
 	@POST
 	@Path("insert")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response insert(@HeaderParam("Authorization") String token, String param) {
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+	public Response insert(@HeaderParam("Authorization") String token, 
+			@FormDataParam("file") InputStream uploadedInputStream, 
+    		@FormDataParam("file") FormDataContentDisposition fileDetail,
+    		@FormDataParam("param") String param) throws Exception {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		CourseDao courseDao = (CourseDaoImpl) this.appContext.getBean("courseDao");
-		JSONObject result = courseDao.insert(param, this.userId);
+		String configDirRoot = context.getRealPath("/WEB-INF/classes/config.properties");
+		File configFile = new File(configDirRoot);
+		FileReader reader;
+		Properties props = new Properties();
+		reader = new FileReader(configFile);
+		props.load(reader);
+		String fileFolder = props.getProperty("path.urlFileWrite");
+		MainUtility utility = new MainUtility();
+		String location = utility.getUploadFileLocation(fileFolder, fileDetail.getFileName());
+		JSONObject result = courseDao.insert(param, this.userId, uploadedInputStream, location);
 		return Response.status(200).entity(result.toString()).build();
 	}
 	@POST
 	@Path("update")
-	@Consumes(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response update(@HeaderParam("Authorization") String token, String param) {
+	public Response update(@HeaderParam("Authorization") String token, 
+			@FormDataParam("file") InputStream uploadedInputStream, 
+    		@FormDataParam("file") FormDataContentDisposition fileDetail,
+    		@FormDataParam("param") String param) {
 		if (!this.isLogined)
 			return Response.status(200).entity(this.notFoundUser().toString()).build();
 		CourseDao courseDao = (CourseDaoImpl) this.appContext.getBean("courseDao");

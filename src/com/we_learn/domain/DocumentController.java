@@ -2,7 +2,10 @@ package com.we_learn.domain;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +22,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
-
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.we_learn.common.MainUtility;
 import com.we_learn.common.VerifyToken;
 import com.we_learn.dao.ArticleTopicContentDao;
@@ -95,4 +99,31 @@ public class DocumentController extends VerifyToken {
 		}
 		return Response.status(200).entity(result.toString()).build();
 	}
+	@POST
+    @Path("/upload")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response insert(@HeaderParam("Authorization") String token,
+    		@FormDataParam("file") InputStream uploadedInputStream, 
+    		@FormDataParam("file") FormDataContentDisposition fileDetail,
+    		@FormDataParam("param") String param) throws IOException {
+    	appContext = WebApplicationContextUtils.getWebApplicationContext(context);
+//    	if (!isLogined) {
+//    		return Response.status(401).build();
+//    	}
+    	String configDirRoot = context.getRealPath("/WEB-INF/classes/config.properties");
+		File configFile = new File(configDirRoot);
+		FileReader reader;
+		Properties props = new Properties();
+		reader = new FileReader(configFile);
+		props.load(reader);
+		String fileFolder = props.getProperty("path.urlFileWrite");
+		MainUtility utility = new MainUtility();
+		System.out.println("Param: " + param);
+		String location = utility.getUploadFileLocation(fileFolder, fileDetail.getFileName());
+		utility.uploadImage(uploadedInputStream, location);
+    	JSONObject jsonObject = new JSONObject();
+    	return Response.status(200).entity(jsonObject.toString())
+    			.build();
+    }
 }

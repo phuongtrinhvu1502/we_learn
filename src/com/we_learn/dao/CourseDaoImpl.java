@@ -1,10 +1,12 @@
 package com.we_learn.dao;
 
+import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.json.simple.JSONObject;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -22,18 +24,20 @@ public class CourseDaoImpl implements CourseDao{
 		return jdbcTemplate;
 	}
 	@Override
-	public JSONObject insert(String param, String user_id) {
+	public JSONObject insert(String param, String user_id, InputStream video, String location) {
 		// TODO Auto-generated method stub
 				JSONObject result = new JSONObject();
 				MainUtility mainUtil = new MainUtility();
 				JSONObject jsonParams = mainUtil.stringToJson(param);
 				String title = jsonParams.get("course_title").toString();
 				String content = jsonParams.get("course_content").toString();
-				
-				String query = "INSERT INTO `course`(`course_title`, `course_content`, `created_by`) VALUE (?,?,?)";
+				String is_premium = jsonParams.get("is_premium").toString();
+				MainUtility utility = new MainUtility();
+				utility.uploadImage(video, location);
+				String query = "INSERT INTO `course`(`course_title`, `course_content`,`is_premium`, `created_by`) VALUE (?,?,?,?)";
 				//insert
 				try {
-					Object[] objects = new Object[] {title, content, user_id};
+					Object[] objects = new Object[] {title, content, is_premium, user_id};
 					int row = this.jdbcTemplate.update(query, objects);
 				} catch (Exception e) {
 					// TODO: handle exception
