@@ -165,12 +165,12 @@ public class CourseDaoImpl implements CourseDao{
 		try {
 			Map<String, Object> qaObject = this.jdbcTemplate.queryForMap(query);
 			if (qaObject.get("is_premium").toString().equals("1")) {
-				if (user_id == null) {
+				if (user_id == null || user_id == "") {
 					result.put("success", false);
 					result.put("msg", "Đây là nội dung chỉ dành cho premium user, xin hãy update tài khoản lên premium để xem bài học");
 					return result;
 				} else {
-					int groud_id = this.jdbcTemplate.queryForObject(queryForUserPremistion, Integer.class);
+					int groud_id = this.jdbcTemplate.queryForObject(queryForUserPremistion,new Object[] {user_id}, Integer.class);
 					if (groud_id == 2) {
 						result.put("success", false);
 						result.put("msg", "Đây là nội dung chỉ dành cho premium user, xin hãy update tài khoản lên premium để xem bài học");
