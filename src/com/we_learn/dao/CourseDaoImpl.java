@@ -205,47 +205,31 @@ public class CourseDaoImpl implements CourseDao{
 					builderGetTotalNormal.append(" AND qa.course_title LIKE N'%"
 							+ jsonParams.get("course_title").toString() + "%'");
 				}
-				StringBuilder builderGetPremium = builderGetNormal;
-				StringBuilder builderGetTotalPremium = builderGetTotalNormal;
-				builderGetPremium.append(" AND qa.is_premium = 1");
-				builderGetNormal.append(" AND qa.is_premium = 0");
-				builderGetTotalNormal.append(" AND qa.is_premium = 0");
-				builderGetTotalPremium.append(" AND qa.is_premium = 1");
+				builderGetNormal.append(" AND qa.is_premium = " + jsonParams.get("is_premium").toString());
+				builderGetTotalNormal.append(" AND qa.is_premium = " + jsonParams.get("is_premium").toString());
 				// sortby
 				if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
 					switch (jsonParams.get("sortField").toString()) {
 					default:
 						builderGetNormal.append(" ORDER BY qa.created_date DESC");
-						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 						break;
 					}
 					// sortOrder chá»‰ lÃ  descend vÃ  ascend hoáº·c rá»—ng
 					if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
 						builderGetNormal.append(" DESC");
-						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 					}
 					if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
 						builderGetNormal.append(" ASC");
-						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 					}
 				}
 				// láº¥y cÃ¡c biáº¿n tá»« table (limit, offset)
 				mainUtil.getLimitOffset(builderGetNormal, jsonParams);
-				mainUtil.getLimitOffset(builderGetPremium, jsonParams);
 				try {
 					int totalRowNormal = this.jdbcTemplate.queryForObject(builderGetTotalNormal.toString(), Integer.class);
 					List<Map<String, Object>> listNormalCourse = this.jdbcTemplate.queryForList(builderGetNormal.toString());
-					int totalRowPremium = this.jdbcTemplate.queryForObject(builderGetTotalPremium.toString(), Integer.class);
-					List<Map<String, Object>> listPremiumCourse = this.jdbcTemplate.queryForList(builderGetPremium.toString());
-					JSONObject normal = new JSONObject();
-					normal.put("results", listNormalCourse);
-					normal.put("total", totalRowNormal);
-					JSONObject premium = new JSONObject();
-					premium.put("results", listPremiumCourse);
-					premium.put("total", totalRowPremium);
 					JSONObject results = new JSONObject();
-					results.put("normal", normal);
-					results.put("premium", premium);
+					results.put("results", listNormalCourse);
+					results.put("total", totalRowNormal);
 					data.put("data", results);
 					data.put("success", true);
 				} catch (Exception e) {
