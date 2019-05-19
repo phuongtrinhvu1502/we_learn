@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -64,7 +65,7 @@ public class CourseController extends VerifyToken{
 		props.load(reader);
 		String fileFolder = props.getProperty("path.urlFileWrite");
 		MainUtility utility = new MainUtility();
-		String location = utility.getUploadFileLocation(fileFolder, fileDetail.getFileName());
+		String location = utility.getUploadFileLocation(fileFolder, fileDetail.getFileName(), String.valueOf(new Date().getTime()));
 		JSONObject result = courseDao.insert(param, this.userId, uploadedInputStream, location);
 		return Response.status(200).entity(result.toString()).build();
 	}

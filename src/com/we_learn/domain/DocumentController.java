@@ -119,8 +119,7 @@ public class DocumentController extends VerifyToken {
 		props.load(reader);
 		String fileFolder = props.getProperty("path.urlFileWrite");
 		MainUtility utility = new MainUtility();
-		System.out.println("Param: " + param);
-		String location = utility.getUploadFileLocation(fileFolder, fileDetail.getFileName());
+		String location = utility.getUploadFileLocation(fileFolder, "", fileDetail.getFileName());
 		utility.uploadImage(uploadedInputStream, location);
     	JSONObject jsonObject = new JSONObject();
     	return Response.status(200).entity(jsonObject.toString())

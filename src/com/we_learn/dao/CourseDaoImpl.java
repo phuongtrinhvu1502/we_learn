@@ -34,10 +34,15 @@ public class CourseDaoImpl implements CourseDao{
 				String is_premium = jsonParams.get("is_premium").toString();
 				MainUtility utility = new MainUtility();
 				utility.uploadImage(video, location);
-				String query = "INSERT INTO `course`(`course_title`, `course_content`,`is_premium`, `created_by`) VALUE (?,?,?,?)";
+				StringBuilder url = new StringBuilder();
+				url.append(location);
+				url.delete(0, 16);
+				url.replace(12, 13, "/");
+				String courseUrl = "http://localhost:1502/" + url.toString();
+				String query = "INSERT INTO `course`(`course_title`, `course_content`,`is_premium`, `created_by`,`course_url`) VALUE (?,?,?,?,?)";
 				//insert
 				try {
-					Object[] objects = new Object[] {title, content, is_premium, user_id};
+					Object[] objects = new Object[] {title, content, is_premium, user_id, courseUrl};
 					int row = this.jdbcTemplate.update(query, objects);
 				} catch (Exception e) {
 					// TODO: handle exception

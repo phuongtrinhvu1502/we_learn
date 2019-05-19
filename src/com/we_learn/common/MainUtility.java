@@ -305,8 +305,8 @@ public class MainUtility {
 		}
 
 	}
-	public String getUploadFileLocation(String folderLocation, String fileName) {
-		File file = new File(folderLocation + "videos/");
+	public String getUploadFileLocation(String folderLocation, String fileName, String folderName) {
+		File file = new File(folderLocation + "videos/" + folderName + "/");
 		if (!file.exists()) {
 			file.mkdirs();
 		}
