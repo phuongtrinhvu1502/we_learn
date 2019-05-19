@@ -181,53 +181,71 @@ public class CourseDaoImpl implements CourseDao{
 				JSONObject result = new JSONObject();
 				MainUtility mainUtil = new MainUtility();
 				JSONObject jsonParams = mainUtil.stringToJson(param);
-				StringBuilder builder = new StringBuilder();
-				StringBuilder builderGetTotal = new StringBuilder();
+				StringBuilder builderGetNormal = new StringBuilder();
+				StringBuilder builderGetTotalNormal = new StringBuilder();
 				
-				builder.append(
+				builderGetNormal.append(
 						"SELECT qa.course_id, qa.course_title, (SELECT COUNT(course_id) FROM course_comment AS qa_comment WHERE qa_comment.course_id = qa.course_id) AS comment_number, "
 								+ "qa.deleted, user.full_name, "
 								+ "IF(qa.created_date IS NULL,null, DATE_FORMAT(qa.created_date, '%d-%m-%Y')) AS created_date FROM course AS qa "
 								+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id WHERE 1=1 ");
-				builderGetTotal.append("SELECT COUNT(1) FROM course AS qa "
+				builderGetTotalNormal.append("SELECT COUNT(1) FROM course AS qa "
 						+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id ");
 				// filter header
 				if (jsonParams.get("status") == null || Integer.parseInt(jsonParams.get("status").toString()) == -1) {
-					builder.append(" AND qa.deleted <> 1");
-					builderGetTotal.append(" AND qa.deleted <> 1");
+					builderGetNormal.append(" AND qa.deleted <> 1");
+					builderGetTotalNormal.append(" AND qa.deleted <> 1");
 				} else if (Integer.parseInt(jsonParams.get("status").toString()) == -2) {// thÃ¹ng rÃ¡c
-					builder.append(" AND qa.deleted = 1");
-					builderGetTotal.append(" AND qa.deleted = 1");
+					builderGetNormal.append(" AND qa.deleted = 1");
+					builderGetTotalNormal.append(" AND qa.deleted = 1");
 				}
 				if (jsonParams.get("course_title") != null && !"".equals(jsonParams.get("course_title").toString())) {
-					builder.append(" AND qa.course_title LIKE N'%" + jsonParams.get("course_title").toString()
+					builderGetNormal.append(" AND qa.course_title LIKE N'%" + jsonParams.get("course_title").toString()
 							+ "%'");
-					builderGetTotal.append(" AND qa.course_title LIKE N'%"
+					builderGetTotalNormal.append(" AND qa.course_title LIKE N'%"
 							+ jsonParams.get("course_title").toString() + "%'");
 				}
+				StringBuilder builderGetPremium = builderGetNormal;
+				StringBuilder builderGetTotalPremium = builderGetTotalNormal;
+				builderGetPremium.append(" AND qa.is_premium = 1");
+				builderGetNormal.append(" AND qa.is_premium = 0");
+				builderGetTotalNormal.append(" AND qa.is_premium = 0");
+				builderGetTotalPremium.append(" AND qa.is_premium = 1");
 				// sortby
 				if (jsonParams.get("sortField") != null && !"".equals(jsonParams.get("sortField").toString())) {
 					switch (jsonParams.get("sortField").toString()) {
 					default:
-						builder.append(" ORDER BY qa.created_date DESC");
+						builderGetNormal.append(" ORDER BY qa.created_date DESC");
+						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 						break;
 					}
 					// sortOrder chá»‰ lÃ  descend vÃ  ascend hoáº·c rá»—ng
 					if (jsonParams.get("sortOrder") != null && "descend".equals(jsonParams.get("sortOrder").toString())) {
-						builder.append(" DESC");
+						builderGetNormal.append(" DESC");
+						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 					}
 					if (jsonParams.get("sortOrder") != null && "ascend".equals(jsonParams.get("sortOrder").toString())) {
-						builder.append(" ASC");
+						builderGetNormal.append(" ASC");
+						builderGetPremium.append(" ORDER BY qa.created_date DESC");
 					}
 				}
 				// láº¥y cÃ¡c biáº¿n tá»« table (limit, offset)
-				mainUtil.getLimitOffset(builder, jsonParams);
+				mainUtil.getLimitOffset(builderGetNormal, jsonParams);
+				mainUtil.getLimitOffset(builderGetPremium, jsonParams);
 				try {
-					int totalRow = this.jdbcTemplate.queryForObject(builderGetTotal.toString(), Integer.class);
-					List<Map<String, Object>> listQA = this.jdbcTemplate.queryForList(builder.toString());
+					int totalRowNormal = this.jdbcTemplate.queryForObject(builderGetTotalNormal.toString(), Integer.class);
+					List<Map<String, Object>> listNormalCourse = this.jdbcTemplate.queryForList(builderGetNormal.toString());
+					int totalRowPremium = this.jdbcTemplate.queryForObject(builderGetTotalPremium.toString(), Integer.class);
+					List<Map<String, Object>> listPremiumCourse = this.jdbcTemplate.queryForList(builderGetPremium.toString());
+					JSONObject normal = new JSONObject();
+					normal.put("results", listNormalCourse);
+					normal.put("total", totalRowNormal);
+					JSONObject premium = new JSONObject();
+					premium.put("results", listPremiumCourse);
+					premium.put("total", totalRowPremium);
 					JSONObject results = new JSONObject();
-					results.put("results", listQA);
-					results.put("total", totalRow);
+					results.put("normal", normal);
+					results.put("premium", premium);
 					data.put("data", results);
 					data.put("success", true);
 				} catch (Exception e) {
