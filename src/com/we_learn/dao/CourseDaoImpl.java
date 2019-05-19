@@ -155,15 +155,23 @@ public class CourseDaoImpl implements CourseDao{
 	}
 
 	@Override
-	public JSONObject viewCourseById(String qa_id) {
+	public JSONObject viewCourseById(String qa_id, String user_id) {
 		JSONObject result = new JSONObject();
-		String query = "SELECT qa.course_title, qa.course_content, qa.course_url, user.user_login "
+		String query = "SELECT qa.course_title, qa.course_content, qa.course_url, qa.is_premium, user.user_login "
 				+ "FROM course AS qa "
 				+ "LEFT JOIN crm_user AS user ON qa.created_by = user.user_id "
 				+ "WHERE qa.course_id = " + qa_id;
+		String queryForUserPremistion = "SELECT `group_id` FROM `crm_user` WHERE `user_id` = ?";
 		try {
 			Map<String, Object> qaObject = this.jdbcTemplate.queryForMap(query);
-
+			if (qaObject.get("is_premium").toString().equals("1")) {
+				int groud_id = this.jdbcTemplate.queryForObject(queryForUserPremistion, Integer.class);
+				if (groud_id == 2) {
+					result.put("success", false);
+					result.put("msg", "Đây là nội dung chỉ dành cho premium user, xin hãy update tài khoản lên premium để xem bài học");
+					return result;
+				}
+			}
 			result.put("success", true);
 			result.put("data", qaObject);
 		} catch (Exception e) {

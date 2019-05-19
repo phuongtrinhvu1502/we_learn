@@ -148,7 +148,7 @@ public class CourseController extends VerifyToken{
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response viewQAById(@HeaderParam("Authorization") String token, @Context HttpServletRequest request) {
 		CourseDao courseDao = (CourseDaoImpl) this.appContext.getBean("courseDao");
-		JSONObject result = courseDao.viewCourseById(request.getParameter("course_id"));
+		JSONObject result = courseDao.viewCourseById(request.getParameter("course_id"), this.userId);
 		return Response.status(200).entity(result.toString()).build();
 	}
 }

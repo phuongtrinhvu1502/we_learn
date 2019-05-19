@@ -12,6 +12,6 @@ public interface CourseDao {
 	public JSONObject remove(String qa, int user_id);
 	public JSONObject restore(String qa, int user_id);
 	public JSONObject getCourseById(String qa_id);
-	public JSONObject viewCourseById(String qa_id);
+	public JSONObject viewCourseById(String qa_id, String user_id);
 	JSONObject getCourseByPage(String param);
 }
