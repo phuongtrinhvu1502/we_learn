@@ -327,7 +327,7 @@ public class LoginDaoImp implements LoginDao {
 			} catch (NoSuchAlgorithmException e) {
 			}
 			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, group_id, create_date, "
-					+ "deleted, code_active, expired_active, active_status)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "deleted, code_active, expired_active, active_status)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			String codeActive = UUID.randomUUID().toString();
 			KeyHolder holder = new GeneratedKeyHolder();
 			this.jdbcTemplate.update(new PreparedStatementCreator() {
@@ -350,6 +350,7 @@ public class LoginDaoImp implements LoginDao {
 					return ps;
 				}
 			}, holder);
+			result.put("success", true);
 //			if (holder.getKey().intValue() > 0) {
 //				// gá»­i mail active
 //				String subject = "Thông báo kích hoạt tài khoản: " + jsonParams.get("user_login");
@@ -359,7 +360,7 @@ public class LoginDaoImp implements LoginDao {
 //						+ jsonParams.get("user_login").toString() + "&code=" + codeActive
 //						+ "'> táº¡i Ä‘Ă¢y </a> Ä‘á»ƒ kĂ­ch hoáº¡t tĂ i khoáº£n.");
 //				this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
-//				result.put("success", true);
+				
 //			} else {
 //				result.put("success", false);
 //				result.put("msg", "Xáº£y ra lá»—i khi kĂ­ch hoáº¡t tĂ i khoáº£n. Vui lĂ²ng kiá»ƒm tra láº¡i thĂ´ng tin");
