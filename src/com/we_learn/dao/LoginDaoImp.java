@@ -327,7 +327,7 @@ public class LoginDaoImp implements LoginDao {
 			} catch (NoSuchAlgorithmException e) {
 			}
 			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, group_id, create_date, "
-					+ "deleted, code_active, expired_active)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+					+ "deleted, code_active, expired_active, active_status)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			String codeActive = UUID.randomUUID().toString();
 			KeyHolder holder = new GeneratedKeyHolder();
 			this.jdbcTemplate.update(new PreparedStatementCreator() {
@@ -346,6 +346,7 @@ public class LoginDaoImp implements LoginDao {
 					mainUtil.setParam(ps, codeActive, "string", count++);
 					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
 							count++);
+					mainUtil.setParam(ps, 1, "int", count++);
 					return ps;
 				}
 			}, holder);
