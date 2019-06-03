@@ -14,5 +14,7 @@ public interface LoginDao {
 	public JSONObject activeAccount(String params);
 
 	public JSONObject resendActiveCode(String params, String rootUrl);
+	
+	public JSONObject signUpManager(String params);
 
 }

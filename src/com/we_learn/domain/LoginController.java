@@ -67,6 +67,16 @@ public class LoginController {
 		return Response.status(200).entity(result.toString()).build();
 	}
 	@POST
+	@Path("sign-up-manager")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response signUpManager(String params) {
+		LoginDao authDao = (LoginDaoImp) this.appContext.getBean("loginDao");
+		MainUtility mainUtil = new MainUtility();
+		JSONObject result = authDao.signUpManager(params);
+		return Response.status(200).entity(result.toString()).build();
+	}
+	@POST
 	@Path("active-account")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

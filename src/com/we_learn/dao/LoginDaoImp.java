@@ -294,4 +294,80 @@ public class LoginDaoImp implements LoginDao {
 		}
 		return result;
 	}
+
+	@Override
+	public JSONObject signUpManager(String params) {
+		JSONObject result = new JSONObject();
+		MainUtility mainUtil = new MainUtility();
+		JSONObject jsonParams = mainUtil.stringToJson(params);
+		String sqlCheckExists;
+		try {
+			String passwordMd5 = "";
+			sqlCheckExists = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE (user_login = N'"
+					+ jsonParams.get("user_login").toString() + "'))";
+			if (this.jdbcTemplate.queryForObject(sqlCheckExists, Integer.class) == 1) {
+				result.put("success", false);
+				result.put("msg", "Tài khoản đã tồn tại. Vui lòng kiểm tra lại");
+				return result;
+			}
+			String queryCheckEmailExists = "SELECT EXISTS (SELECT 1 FROM crm_user WHERE (email = N'"
+					+ jsonParams.get("email").toString() + "'))";
+			if (this.jdbcTemplate.queryForObject(queryCheckEmailExists, Integer.class) == 1) {
+				result.put("success", false);
+				result.put("msg", "Email đã tồn tại. Vui lòng kiểm tra lại");
+				return result;
+			}
+			String password = jsonParams.get("password").toString();
+			try {
+				MessageDigest md = MessageDigest.getInstance("md5");
+				md.update(password.getBytes());
+				byte[] digest = md.digest();
+				passwordMd5 = DatatypeConverter.printHexBinary(digest).toLowerCase();
+				jsonParams.put("password", passwordMd5);
+			} catch (NoSuchAlgorithmException e) {
+			}
+			String sqlInsertUser = "INSERT INTO crm_user (user_login, full_name, password, email, group_id, create_date, "
+					+ "deleted, code_active, expired_active)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String codeActive = UUID.randomUUID().toString();
+			KeyHolder holder = new GeneratedKeyHolder();
+			this.jdbcTemplate.update(new PreparedStatementCreator() {
+				@Override
+				public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+					PreparedStatement ps = connection.prepareStatement(sqlInsertUser, Statement.RETURN_GENERATED_KEYS);
+					int count = 1;
+					mainUtil.setParam(ps, jsonParams.get("user_login"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("full_name"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("password"), "string", count++);
+					mainUtil.setParam(ps, jsonParams.get("email"), "string", count++);
+					mainUtil.setParam(ps, 4, "int", count++);
+					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
+							count++);
+					mainUtil.setParam(ps, 0, "int", count++);
+					mainUtil.setParam(ps, codeActive, "string", count++);
+					mainUtil.setParam(ps, mainUtil.dateToStringFormat(new Date(), "yyyy-MM-dd HH:mm:ss"), "string",
+							count++);
+					return ps;
+				}
+			}, holder);
+//			if (holder.getKey().intValue() > 0) {
+//				// gá»­i mail active
+//				String subject = "Thông báo kích hoạt tài khoản: " + jsonParams.get("user_login");
+//				StringBuilder content;
+//				content = new StringBuilder();
+//				content.append("Click <a href='" + rootUrl + "#/active-account?user="
+//						+ jsonParams.get("user_login").toString() + "&code=" + codeActive
+//						+ "'> táº¡i Ä‘Ă¢y </a> Ä‘á»ƒ kĂ­ch hoáº¡t tĂ i khoáº£n.");
+//				this.sendMimeEmail(jsonParams.get("email").toString(), subject, content.toString());
+//				result.put("success", true);
+//			} else {
+//				result.put("success", false);
+//				result.put("msg", "Xáº£y ra lá»—i khi kĂ­ch hoáº¡t tĂ i khoáº£n. Vui lĂ²ng kiá»ƒm tra láº¡i thĂ´ng tin");
+//			}
+		} catch (Exception e) {
+			result.put("success", false);
+			result.put("msg", "Xáº£y ra lá»—i khi kĂ­ch hoáº¡t tĂ i khoáº£n. Vui lĂ²ng kiá»ƒm tra láº¡i thĂ´ng tin");
+			result.put("err", e.getMessage());
+		}
+		return result;
+	}
 }
